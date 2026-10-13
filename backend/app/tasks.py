@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from celery import Celery
-from .engine_registry import ENGINES, resolve_engine
+from .engine_registry import resolve_engine
 from .jobs import DATA_DIR, get_job, update_job
 
 celery = Celery("mesh3d", broker=os.getenv("REDIS_URL", "redis://redis:6379/0"), backend=os.getenv("REDIS_URL", "redis://redis:6379/0"))
@@ -22,7 +22,6 @@ def run_job(self, job_id: str) -> None:
     if not job: return
     job = update_job(job_id, status="running", error=None)
     if not job: return
-    any_success = False
     for run in job["runs"]:
         if run["status"] == "cancelled": continue
         run["status"] = "running"; run["started_at"] = now()
@@ -55,7 +54,7 @@ def run_job(self, job_id: str) -> None:
                 digest = hashlib.sha256(resolved.read_bytes()).hexdigest()
                 artifacts.append({"name": resolved.name, "format": str(item.get("format", resolved.suffix.lstrip("."))).lower(), "url": f"/api/artifacts/{job_id}/{engine.id}/{resolved.name}", "bytes": resolved.stat().st_size, "sha256": digest})
             if not artifacts: raise RuntimeError("Wrapper returned no artifacts; manifest must list actual output files.")
-            run["artifacts"] = artifacts; run["status"] = "completed"; run["finished_at"] = now(); run["elapsed_seconds"] = round(time.monotonic() - start, 3); any_success = True
+            run["artifacts"] = artifacts; run["status"] = "completed"; run["finished_at"] = now(); run["elapsed_seconds"] = round(time.monotonic() - start, 3)
         except Exception as exc:
             run["status"] = "failed"; run["finished_at"] = now(); run["elapsed_seconds"] = round(time.monotonic() - start, 3); run["error"] = str(exc)[:600]
         update_job(job_id, status="running", runs=job["runs"])
