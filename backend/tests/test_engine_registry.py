@@ -32,4 +32,4 @@ def test_unknown_engine_is_rejected():
 def test_malformed_command_is_not_accepted():
     engine = next(item for item in ENGINES if item.id == "triposr")
     with patch.dict("os.environ", {engine.approval_env: "true", engine.command_env: "python wrapper.py"}, clear=True):
-        with pytest.raises(ValueError): public_engine(engine)
+        assert public_engine(engine)["status"] == "not_configured"
