@@ -28,6 +28,7 @@ export default function App() {
   const [mobileNav, setMobileNav] = useState(false);
   const [notice, setNotice] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const uploadsRef = useRef<UploadItem[]>([]);
   const refresh = useCallback(async () => {
     try {
       const [engineData, jobData] = await Promise.all([api.engines(), api.jobs()]);
@@ -35,7 +36,8 @@ export default function App() {
     } catch (error) { setApiError(error instanceof Error ? error.message : "API unavailable"); }
   }, []);
   useEffect(() => { void refresh(); const timer = window.setInterval(() => { void refresh(); }, 5000); return () => window.clearInterval(timer); }, [refresh]);
-  useEffect(() => () => uploads.forEach((item) => URL.revokeObjectURL(item.preview)), [uploads]);
+  useEffect(() => { uploadsRef.current = uploads; }, [uploads]);
+  useEffect(() => () => uploadsRef.current.forEach((item) => URL.revokeObjectURL(item.preview)), []);
   const compatibleEngines = useMemo(() => engines.filter((engine) => engine.mode === mode), [engines, mode]);
   const readyCount = compatibleEngines.filter((engine) => engine.status === "ready").length;
   const completedRuns = jobs.flatMap((job) => job.runs.map((run) => ({ ...run, jobId: job.id, mode: job.mode }))).filter((run) => run.status === "completed" && run.artifacts.some((artifact) => artifact.format.toLowerCase() === "glb" || artifact.format.toLowerCase() === "gltf"));
@@ -46,7 +48,7 @@ export default function App() {
     const next = valid.map((file) => ({ id: crypto.randomUUID(), file, preview: URL.createObjectURL(file) }));
     setUploads((previous) => [...previous, ...next].slice(0, mode === "single_image" ? 1 : 80));
   };
-  const removeUpload = (id: string) => setUploads((previous) => previous.filter((item) => item.id !== id));
+  const removeUpload = (id: string) => setUploads((previous) => { const removed = previous.find((item) => item.id === id); if (removed) URL.revokeObjectURL(removed.preview); return previous.filter((item) => item.id !== id); });
   const changeMode = (next: Mode) => {
     setMode(next); setSelected([]); setUploads((previous) => next === "single_image" ? previous.slice(0, 1) : previous);
   };
