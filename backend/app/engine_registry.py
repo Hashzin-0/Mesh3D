@@ -37,10 +37,17 @@ def _command(engine: Engine) -> list[str] | None:
     return parsed
 
 def public_engine(engine: Engine) -> dict:
-    command = _command(engine)
+    try:
+        command = _command(engine)
+        command_error = None
+    except ValueError as exc:
+        command = None
+        command_error = str(exc)
     approved = os.getenv(engine.approval_env, "").lower() == "true"
     extra_review_passed = not engine.requires_extra_review or os.getenv(f"{engine.approval_env}_EXTRA", "").lower() == "true"
-    if engine.requires_extra_review and not extra_review_passed:
+    if command_error:
+        status, reason = "not_configured", command_error
+    elif engine.requires_extra_review and not extra_review_passed:
         status, reason = "license_review", "Additional deployment/checkpoint review is required before this candidate can be enabled."
     elif not approved:
         status, reason = "license_review", f"Review and explicitly approve the license gate using {engine.approval_env}=true."
