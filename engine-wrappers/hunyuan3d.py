@@ -18,7 +18,7 @@ from PIL import Image
 import trimesh
 root, image_path, output_dir = Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3])
 sys.path.insert(0, str(root))
-from hy3dgen.shapegen import Hunyuan3DDiTFlowMatchingPipeline
+from hy3dshape import Hunyuan3DDiTFlowMatchingPipeline\nfrom hy3dshape.pipelines import export_to_trimesh
 model_id = os.getenv("MESH3D_HUNYUAN3D_MODEL", "tencent/Hunyuan3D-2.1")
 subfolder = os.getenv("MESH3D_HUNYUAN3D_SUBFOLDER", "hunyuan3d-dit-v2-1")
 pipe = Hunyuan3DDiTFlowMatchingPipeline.from_pretrained(model_id, subfolder=subfolder)
