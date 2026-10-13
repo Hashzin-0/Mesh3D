@@ -29,7 +29,6 @@ export default function App() {
   const [notice, setNotice] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
   const uploadsRef = useRef<UploadItem[]>([]);
-  const uploadsRef = useRef<UploadItem[]>([]);
   const refresh = useCallback(async () => {
     try {
       const [engineData, jobData] = await Promise.all([api.engines(), api.jobs()]);
