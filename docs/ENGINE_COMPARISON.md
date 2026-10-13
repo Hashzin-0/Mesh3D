@@ -13,7 +13,7 @@ Input: one photo of one object. The engine infers hidden surfaces; those surface
 | TripoSR | https://github.com/VAST-AI-Research/TripoSR | Fast single-image mesh generation; useful baseline for speed and output inspection | Upstream README states MIT for code and pretrained model; still archive exact revision and dependency notices | P0 |
 | InstantMesh | https://github.com/TencentARC/InstantMesh | Single-image mesh generation using sparse-view reconstruction components | Apache-2.0 repository license; audit model weights, dependencies, and model card separately | P0 |
 | Stable Fast 3D | https://github.com/Stability-AI/stable-fast-3d | Fast textured asset generation from a single image | Stability AI Community License is not an OSI-style permissive license; commercial registration, attribution/UI notice, and revenue limits may apply | P1, behind license gate |
-| Hunyuan3D | https://github.com/Tencent-Hunyuan/Hunyuan3D-2 | Candidate for a higher-quality generative baseline and future texture pipeline | Review the exact repository/version, checkpoint terms, and community license before activation | P1, after verification |
+| Hunyuan3D 2.1 | https://github.com/Tencent-Hunyuan/Hunyuan3D-2.1 | Candidate for a higher-quality generative baseline and future texture pipeline | Community-license terms are territory- and deployment-sensitive; individual model packages may carry separate non-commercial terms. Audit every submodel/checkpoint and target market before activation | P2, license gate only |
 
 **Adapter contract:** accept one validated image plus explicit generation settings; return a normalized artifact manifest and engine metrics. Keep each engine's native outputs for debugging and convert to GLB only in a separate export stage.
 
