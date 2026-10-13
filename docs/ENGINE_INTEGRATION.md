@@ -38,7 +38,7 @@ Official references:
 2. Install dependencies following each upstream repository's current instructions in a separate environment. Do not share one environment across the four PyTorch generators: their dependency/CUDA constraints differ.
 3. Configure `*_ROOT`, `*_PYTHON`, and binary paths in a private `.env`. For gated weights, configure `HF_TOKEN` privately only after access has been granted.
 4. Confirm Docker can access the host GPU. The default Compose file intentionally does not force GPU reservations, so the UI/API can start on machines without NVIDIA runtime. For GPU inference, use a Compose GPU override compatible with the host's NVIDIA Container Toolkit or run the worker on a GPU-enabled host. Model runtimes and CUDA are not installed by the generic API Dockerfile.
-5. Start the stack with `docker compose up --build`. Inspect `GET /api/engines`; a candidate remains unavailable until command configuration and approval gates are both satisfied.
+5. Start the stack with `docker compose up --build`. For a host configured with the NVIDIA Container Toolkit, use `docker compose -f docker-compose.yml -f docker-compose.gpu.yml up --build` to request GPU access for the worker. Inspect `GET /api/engines`; a candidate remains unavailable until command configuration and approval gates are both satisfied.
 
 Example command configuration (the actual `.env.example` contains all seven):
 ```dotenv
