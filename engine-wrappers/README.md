@@ -1,17 +1,24 @@
 # Engine wrapper contract
 
-This directory is mounted read-only into the worker. Add one wrapper per engine after pinning the upstream revision, checkpoint, runtime, and license decision. Do not commit downloaded weights, credentials, private datasets, or large model binaries.
+Each adapter calls a real upstream project; no generated placeholder geometry or fabricated scores are allowed. The adapters in this directory are the concrete entry points:
+- `triposr.py`
+- `instantmesh.py`
+- `stable_fast_3d.py`
+- `hunyuan3d.py`
+- `meshroom.py`
+- `colmap_openmvs.py`
+- `vggt.py`
 
-The configured command is a JSON argv array (never a shell command string). Mesh3D replaces these exact placeholders in each argv item:
-- `{input_dir}`: read-only-by-convention source images for the job
-- `{output_dir}`: engine-specific output directory, writable by the worker
+See [the engine integration guide](../docs/ENGINE_INTEGRATION.md) for the upstream CLI/API contract, environment variables, licensing gates, provisioning and smoke-test procedure.
+
+## Shared contract
+
+Mesh3D substitutes these exact placeholders in each configured JSON argv array:
+- `{input_dir}`: validated uploaded source images
+- `{output_dir}`: engine-specific output directory writable by the worker
 - `{mode}`: `single_image` or `multi_view`
 
-The wrapper must:
-1. Validate its arguments and reject unsupported input mode/counts.
-2. Invoke the real, pinned upstream engine with explicit resource/time limits.
-3. Exit non-zero on any failure; write diagnostics to stdout/stderr without secrets.
-4. Write `manifest.json` in `{output_dir}` only after successful processing. Shape:
+The wrapper must validate mode/count, invoke the real upstream code, return a non-zero exit code on failure, and write `manifest.json` only after real artifacts exist. Manifest shape:
 
 ```json
 {
@@ -21,6 +28,6 @@ The wrapper must:
 }
 ```
 
-Each artifact path must be relative to the output directory and point to an existing real file. Mesh3D calculates SHA-256 and byte size from the actual file. It does not generate substitute geometry or synthesize benchmark scores.
+Paths must be relative to the output directory. Mesh3D validates paths, copies nested outputs into the engine output root for artifact delivery, and computes SHA-256/byte size from actual files.
 
-A wrapper is not considered verified merely because the command is configured. Run it against a rights-cleared real fixture, inspect the output manually, verify formats, and record engine/checkpoint revisions, hardware, elapsed time, warnings, and hashes in the provenance register. The API registry stays gated until the license approval flags are explicitly enabled.
+Do not commit downloaded weights, credentials, private datasets, or generated outputs. Do not enable license flags until the exact code and checkpoint terms are reviewed. An adapter file or a configured command is not evidence that the model was smoke-tested. Record real test outcomes in `docs/ENGINE_TEST_REPORT.md`.
