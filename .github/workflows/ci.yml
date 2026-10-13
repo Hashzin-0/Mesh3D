@@ -29,3 +29,4 @@ jobs:
         working-directory: backend
       - run: pytest
         working-directory: backend
+      - run: python -m compileall -q engine-wrappers
