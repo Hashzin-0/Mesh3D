@@ -38,7 +38,7 @@ export default function ModelViewer({ url, label }: Props) {
       camera.position.set(largest * 1.8, largest * 1.25, largest * 2.1);
       camera.near = Math.max(largest / 1000, 0.001); camera.far = largest * 100; camera.updateProjectionMatrix();
       controls.target.set(0, 0, 0); controls.update(); setError("");
-    }, undefined, (cause) => { if (!disposed) setError(cause.message || "Could not load this 3D artifact."); });
+    }, undefined, (cause) => { if (!disposed) setError(cause instanceof Error ? cause.message : "Could not load this 3D artifact."); });
     let frame = 0;
     const animate = () => { if (disposed) return; frame = requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); };
     animate();
