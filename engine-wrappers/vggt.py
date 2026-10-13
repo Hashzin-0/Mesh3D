@@ -2,7 +2,7 @@
 """VGGT multi-view geometry adapter; exports its real COLMAP/point-cloud output, not a fabricated mesh."""
 from pathlib import Path
 import os, sys
-from common import parse_args, validate_inputs, required_env, run_command, collect_outputs, write_manifest
+from common import parse_args, validate_inputs, required_env, engine_python, run_command, collect_outputs, write_manifest
 
 args = parse_args("Run VGGT geometry inference for a multi-view image set.")
 validate_inputs(args, minimum=2)
@@ -17,7 +17,7 @@ import shutil
 for image in sorted(args.input_dir.resolve().iterdir()):
     if image.is_file() and image.suffix.lower() in {".jpg", ".jpeg", ".png", ".webp"}:
         shutil.copy2(image, scene / "images" / image.name)
-argv = [sys.executable, str(demo), f"--scene_dir={scene}"]
+argv = [engine_python("MESH3D_VGGT", root), str(demo), f"--scene_dir={scene}"]
 if os.getenv("MESH3D_VGGT_USE_BA", "false").lower() == "true":
     argv.append("--use_ba")
 run_command(argv, cwd=root)
