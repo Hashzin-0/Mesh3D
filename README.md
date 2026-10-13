@@ -51,6 +51,7 @@ Tests cover engine registry/license gates and job persistence. They do not prove
 - [Project rules](Rules.md)
 - [Threat model](docs/THREAT_MODEL.md)
 - [Engine provenance](docs/ENGINE_PROVENANCE.md)
+- [Real engine test report template](docs/ENGINE_TEST_REPORT.md)
 - [Dataset protocol](docs/DATASET_PROTOCOL.md)
 - [Architecture decisions](docs/adr/)
 
