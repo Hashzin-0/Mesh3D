@@ -4,7 +4,7 @@ Mesh3D is planned as an image-to-3D evaluation studio that compares multiple rec
 
 ## Project status
 
-**Planning stage.** This repository was empty when the plan was created. The documents below define the proposed architecture, engine matrix, UI/UX, acceptance criteria, and implementation phases. No conversion engine, worker, or production UI is implemented yet.
+**Planning + Phase 0 governance baseline.** The repository started with planning documents only. Phase 0 has added project rules, a threat model, architecture decisions, engine provenance gates, and a real-dataset protocol. No conversion engine, worker, or production UI is implemented yet; Phase 0 remains incomplete.
 
 ## Documents
 
@@ -12,6 +12,12 @@ Mesh3D is planned as an image-to-3D evaluation studio that compares multiple rec
 - [Engine comparison matrix](docs/ENGINE_COMPARISON.md)
 - [UI/UX specification](docs/UX_UI_SPEC.md)
 - [Acceptance criteria and validation](docs/ACCEPTANCE_CRITERIA.md)
+- [Phase 0 status and blockers](docs/PHASE_0_STATUS.md)
+- [Project rules](Rules.md)
+- [Threat model](docs/THREAT_MODEL.md)
+- [Engine provenance and license gates](docs/ENGINE_PROVENANCE.md)
+- [Real dataset protocol](docs/DATASET_PROTOCOL.md)
+- [Architecture decisions](docs/adr/)
 
 ## Product principles
 
