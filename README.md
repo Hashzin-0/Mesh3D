@@ -1,33 +1,46 @@
 # Mesh3D
 
-Mesh3D is planned as an image-to-3D evaluation studio that compares multiple reconstruction engines on real image inputs. It will support both single-image generation and multi-view reconstruction, with textured mesh export and reproducible benchmark records.
+Mesh3D is an image-to-3D reconstruction studio for comparing real outputs from one image or a multi-view capture. It includes a responsive web client, FastAPI API, Redis/Celery worker, gated engine registry, persistent local job metadata, and a Three.js viewer for GLB/GLTF artifacts.
 
-## Project status
+> **Status:** seven concrete upstream adapter entry points are included. Upstream checkouts, engine-specific environments, checkpoints and accelerator runtime remain operator-provisioned. We have not claimed a successful model/GPU smoke test or bundled any model weights. Engines remain unavailable until their license approval flags and runtime commands are configured.
 
-**Planning stage.** This repository was empty when the plan was created. The documents below define the proposed architecture, engine matrix, UI/UX, acceptance criteria, and implementation phases. No conversion engine, worker, or production UI is implemented yet.
+## Features
 
-## Documents
+- Responsive Studio for single-image and multi-view intake, thumbnails, removal, and capture guidance.
+- Adapter entry points for TripoSR, InstantMesh, Stable Fast 3D, Hunyuan3D 2.1, AliceVision/Meshroom, COLMAP + OpenMVS, and VGGT.
+- Server-side image signature, dimensions, file-size, image-count, and duplicate validation.
+- Async jobs through Redis + Celery, SQLite metadata for local development, run logs, output manifest validation, and artifact SHA-256 hashes.
+- Actual GLB/GLTF loading with Three.js. Comparison stays empty until real outputs exist.
+- CI workflow for frontend build, backend unit tests, and adapter syntax checks.
 
-- [Implementation plan](docs/IMPLEMENTATION_PLAN.md)
-- [Engine comparison matrix](docs/ENGINE_COMPARISON.md)
-- [UI/UX specification](docs/UX_UI_SPEC.md)
-- [Acceptance criteria and validation](docs/ACCEPTANCE_CRITERIA.md)
+## Run the Studio
 
-## Product principles
+Requirements: Docker Engine and Compose plugin.
 
-- Support one image and multiple images as separate, explicit reconstruction modes.
-- Compare real engine outputs; never substitute mock models, synthetic benchmark scores, or fabricated progress.
-- Preserve the original uploads and record engine versions, parameters, timings, errors, and output artifacts.
-- Treat image-to-3D generation and multi-view photogrammetry as different task classes.
-- Review model-weight and dependency licenses separately from source-code licenses before enabling an engine.
-- Keep heavy inference and reconstruction in isolated asynchronous workers, not in the web request lifecycle.
+1. Copy `.env.example` to `.env`.
+2. Run `docker compose up --build`.
+3. For a host configured with the NVIDIA Container Toolkit, use `docker compose -f docker-compose.yml -f docker-compose.gpu.yml up --build` to request GPU access for the worker.
+4. Open `http://localhost:5173`; API health is at `http://localhost:8000/health`, OpenAPI docs at `http://localhost:8000/docs`.
 
-## Proposed baseline
+The Studio/API can start without model runtimes. To run reconstruction, clone and provision the appropriate upstream engines, configure the environment variables in `.env`, provide compatible GPU/runtime access, and complete the engine-specific license review. Do not set approval flags simply to make a candidate appear enabled.
 
-- **Web:** Next.js, React, TypeScript, accessible component primitives, and Three.js for GLB inspection.
-- **API / orchestration:** FastAPI, typed request/response schemas, and Celery + Redis for asynchronous jobs.
-- **Persistence:** PostgreSQL for job metadata and benchmark results; S3-compatible object storage for uploads and generated assets.
-- **Engine workers:** isolated, versioned containers for generative single-image models and classical/neural multi-view reconstruction.
-- **Exports:** GLB as the primary web-delivery artifact; OBJ + MTL + textures, PLY, and STL where applicable.
+## Engine integration
 
-These are proposed choices, not detected dependencies: the repository had no source files or project-specific instructions at planning time.
+See [Engine integration and runtime setup](docs/ENGINE_INTEGRATION.md), the [wrapper contract](engine-wrappers/README.md), [.env.example](.env.example), [engine provenance register](docs/ENGINE_PROVENANCE.md), and [real engine test report template](docs/ENGINE_TEST_REPORT.md).
+
+Important distinctions:
+- The four single-image engines use different dependency and checkpoint stacks; keep their Python environments separate.
+- Meshroom and COLMAP + OpenMVS are photogrammetry pipelines for multi-view captures.
+- VGGT outputs camera/scene geometry and point-cloud data; it is not automatically a textured watertight mesh.
+- The viewer currently targets GLB/GLTF. Other supported artifacts may be delivered as files but are not guaranteed to preview in the in-app viewer.
+- The generic worker is for controlled local evaluation, not a hardened multi-tenant public service. Public deployment still needs worker isolation, authentication/authorization, quotas, network restrictions, retention policy, and deployment-grade storage.
+
+## Checks
+
+Frontend: `npm install && npm run build`
+
+Backend: `cd backend && pip install -r requirements.txt pytest && pytest`
+
+Adapter syntax: `python -m compileall -q engine-wrappers`
+
+Passing CI does not prove any upstream model can run. Real smoke tests require rights-cleared fixtures, pinned source/checkpoint versions, intended hardware, and manual artifact inspection.
