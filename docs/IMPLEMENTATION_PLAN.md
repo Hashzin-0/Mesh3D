@@ -83,7 +83,7 @@ Adapters must not contain UI logic. The orchestrator must not depend on engine-s
 1. TripoSR — speed and permissive-license baseline.
 2. InstantMesh — alternate generative mesh baseline.
 3. Stable Fast 3D — enable only after its Community License conditions have been reviewed and met.
-4. Hunyuan3D — optional candidate after verifying the exact revision, model weights, and use terms.
+4. Hunyuan3D 2.1 — optional candidate only after verifying the exact revision, each model-weight license, territory restrictions, and hosted-service terms.
 
 **Multiple images**
 1. AliceVision/Meshroom — first complete open-source photogrammetry pipeline to validate.
@@ -194,7 +194,7 @@ Retries must be bounded and applied only to retryable failures. Use idempotency 
 - TripoSR: https://github.com/VAST-AI-Research/TripoSR
 - InstantMesh: https://github.com/TencentARC/InstantMesh
 - Stable Fast 3D: https://github.com/Stability-AI/stable-fast-3d
-- Hunyuan3D: https://github.com/Tencent-Hunyuan/Hunyuan3D-2
+- Hunyuan3D: https://github.com/Tencent-Hunyuan/Hunyuan3D-2.1
 - VGGT: https://github.com/facebookresearch/vggt
 - Three.js: https://github.com/mrdoob/three.js
 - Trimesh: https://github.com/mikedh/trimesh
