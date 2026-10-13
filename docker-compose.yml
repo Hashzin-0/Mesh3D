@@ -1,0 +1,37 @@
+services:
+  web:
+    image: node:22-alpine
+    working_dir: /workspace
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
+    ports: ["5173:5173"]
+    volumes: [".:/workspace", "/workspace/node_modules"]
+    environment:
+      VITE_API_BASE_URL: http://localhost:8000
+    depends_on: [api]
+  api:
+    build: ./backend
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
+    ports: ["8000:8000"]
+    volumes: ["mesh3d-data:/data"]
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      MESH3D_DATA_DIR: /data
+      MESH3D_CORS_ORIGINS: http://localhost:5173
+    depends_on: [redis, worker]
+  worker:
+    build: ./backend
+    command: celery -A app.tasks.celery worker --loglevel=INFO --concurrency=1
+    volumes: ["mesh3d-data:/data", "./engine-wrappers:/opt/mesh3d/wrappers:ro"]
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      MESH3D_DATA_DIR: /data
+      # Configure each approved wrapper command as a JSON argv array in a private .env file.
+      # Never enable an engine until its code, checkpoint and deployment licenses are reviewed.
+    depends_on: [redis]
+  redis:
+    image: redis:7-alpine
+    command: redis-server --appendonly yes
+    volumes: ["redis-data:/data"]
+volumes:
+  mesh3d-data:
+  redis-data:
