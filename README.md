@@ -19,7 +19,8 @@ Requirements: Docker Engine and Compose plugin.
 
 1. Copy `.env.example` to `.env`.
 2. Run `docker compose up --build`.
-3. Open `http://localhost:5173`; API health is at `http://localhost:8000/health`, OpenAPI docs at `http://localhost:8000/docs`.
+3. For a host configured with the NVIDIA Container Toolkit, use `docker compose -f docker-compose.yml -f docker-compose.gpu.yml up --build` to request GPU access for the worker.
+4. Open `http://localhost:5173`; API health is at `http://localhost:8000/health`, OpenAPI docs at `http://localhost:8000/docs`.
 
 The Studio/API can start without model runtimes. To run reconstruction, clone and provision the appropriate upstream engines, configure the environment variables in `.env`, provide compatible GPU/runtime access, and complete the engine-specific license review. Do not set approval flags simply to make a candidate appear enabled.
 
