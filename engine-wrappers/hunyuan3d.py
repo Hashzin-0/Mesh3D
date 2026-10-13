@@ -2,7 +2,7 @@
 """Hunyuan3D 2.1 adapter using its Python shape-generation pipeline."""
 from pathlib import Path
 import os
-from common import parse_args, validate_inputs, required_env, write_manifest
+from common import parse_args, validate_inputs, required_env, engine_python, write_manifest
 
 args = parse_args("Run Hunyuan3D 2.1 shape generation for one image.")
 images = validate_inputs(args, single=True)
@@ -32,7 +32,7 @@ if not target.is_file() or target.stat().st_size == 0:
     raise RuntimeError("Hunyuan3D pipeline did not produce a non-empty GLB.")
 print(f"Exported {target} ({target.stat().st_size} bytes)")
 '''
-completed = subprocess.run([sys.executable, "-c", script, str(root), str(images[0]), str(args.output_dir.resolve())], cwd=root, check=False)
+completed = subprocess.run([engine_python("MESH3D_HUNYUAN3D", root), "-c", script, str(root), str(images[0]), str(args.output_dir.resolve())], cwd=root, check=False)
 if completed.returncode:
     raise SystemExit(f"Hunyuan3D upstream pipeline exited with code {completed.returncode}.")
 write_manifest(args.output_dir, [args.output_dir / "hunyuan3d_mesh.glb"])
