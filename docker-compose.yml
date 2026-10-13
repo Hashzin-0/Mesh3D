@@ -22,13 +22,16 @@ services:
   worker:
     build: ./backend
     command: celery -A app.tasks.celery worker --loglevel=INFO --concurrency=1
-    volumes: ["mesh3d-data:/data", "./engine-wrappers:/opt/mesh3d/wrappers:ro"]
+    volumes:
+      - mesh3d-data:/data
+      - ./engine-wrappers:/opt/mesh3d/wrappers:ro
+      - ./engines:/opt/mesh3d/engines:ro
     env_file: .env
     environment:
       REDIS_URL: redis://redis:6379/0
       MESH3D_DATA_DIR: /data
-      # Configure each approved wrapper command as a JSON argv array in a private .env file.
-      # Never enable an engine until its code, checkpoint and deployment licenses are reviewed.
+      HF_HOME: /data/model-cache/huggingface
+      TORCH_HOME: /data/model-cache/torch
     depends_on: [redis]
   redis:
     image: redis:7-alpine
