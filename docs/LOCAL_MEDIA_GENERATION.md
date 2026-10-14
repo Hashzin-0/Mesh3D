@@ -57,3 +57,28 @@ The existing Vercel setup exposes the Vite app and FastAPI API only. Do not run 
 3. Configure a real API-format video workflow and verify a playable video is returned.
 4. Run the API unit tests, frontend build, and existing backend test suite.
 5. Record ComfyUI commit, custom-node versions, model checkpoint revision/hash, model license, GPU/VRAM, settings, output hashes and manual visual review. Repository-level unit tests do not prove real inference.
+
+
+## Optional hosted providers (excluding hosted ComfyUI services)
+
+The Media Studio can use the following server-side adapters in addition to the local ComfyUI workflow. No provider is enabled merely because it appears in the UI; its required configuration must be present. Secrets stay on the API server.
+
+| Provider ID | Media | Required configuration | Free-use caveat |
+|---|---|---|---|
+| `pollinations` | Image | `POLLINATIONS_API_KEY` | Account key, current plan, model availability and quotas are controlled by Pollinations; do not assume unlimited free usage. |
+| `cloudflare-workers-ai` | Image | `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_API_TOKEN` | Uses the configured account's Workers AI allocation; check current pricing and daily quota. |
+| `huggingface-spaces` | Image and/or video | `MESH3D_HF_SPACE_URL`, the matching API name and args JSON | Space owner, GPU quota, queue, uptime and model license apply. Configure image and video functions separately; each args array must contain exactly one `__PROMPT__` marker. |
+
+The Hugging Face adapter uses the Space's Gradio queue API (`/gradio_api/call/{api_name}`) and waits for the completion event. Configure the actual `https://<owner>-<space>.hf.space` host and exact API function name from the Space's **Use via API** panel. The configured arguments are server-owned JSON, not client input. Remote file URLs are accepted only from Hugging Face/Gradio host suffixes; results are copied into the Mesh3D data directory with a size limit before being exposed as artifacts.
+
+### Remote-job limitations
+
+Remote jobs are currently scheduled with FastAPI `BackgroundTasks` and local filesystem persistence, matching the existing API's in-process job model. This is not a durable distributed queue. Video generation can outlive serverless execution limits; use a persistent API worker and persistent `MESH3D_DATA_DIR` for production workloads. No remote generation was claimed as successful without a live provider key and a real generation test.
+
+### Enable and validate
+
+- Configure secrets in the deployment environment, not in `.env.example`.
+- Confirm each provider's current free-tier terms and model/checkpoint license before enabling it.
+- Verify the API name and argument order from the selected Space's own API panel.
+- Generate one real image and one real video where supported; check the returned media, MIME type, file size and SHA-256.
+- A configured endpoint is not proof that a model is reachable, has GPU quota, or will complete a generation.

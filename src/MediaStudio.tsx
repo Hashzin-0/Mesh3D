@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { AlertCircle, CheckCircle2, Film, Image as ImageIcon, LoaderCircle, RefreshCw, Sparkles } from "lucide-react";
-import { api, type MediaEngineStatus, type MediaGeneration } from "./api";
+import { api, type MediaEngineStatus, type MediaGeneration, type MediaProviderStatus } from "./api";
 
 const statusCopy: Record<string, string> = {
   queued: "Queued in local ComfyUI",
@@ -11,13 +11,24 @@ const statusCopy: Record<string, string> = {
 
 export default function MediaStudio() {
   const [kind, setKind] = useState<"image" | "video">("image");
+  const [provider, setProvider] = useState("comfyui-local");
   const [prompt, setPrompt] = useState("");
   const [engine, setEngine] = useState<MediaEngineStatus | null>(null);
   const [generation, setGeneration] = useState<MediaGeneration | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const refreshEngine = useCallback(async () => {
-    try { setEngine(await api.mediaEngines()); } catch (e) { setError(e instanceof Error ? e.message : "Could not inspect local media runtime."); }
+    try {
+      const status = await api.mediaEngines();
+      setEngine(status);
+      const current = status.providers?.find((item) => item.id === provider && item.supports.includes(kind));
+      if (provider === "comfyui-local" && !status[kind].ready) {
+        const firstReady = status.providers?.find((item) => item.ready && item.supports.includes(kind));
+        if (firstReady) setProvider(firstReady.id);
+      } else if (provider !== "comfyui-local" && current && !current.supports.includes(kind)) {
+        setProvider("comfyui-local");
+      }
+    } catch (e) { setError(e instanceof Error ? e.message : "Could not inspect media providers."); }
   }, []);
   useEffect(() => { void refreshEngine(); }, [refreshEngine]);
   useEffect(() => {
@@ -31,22 +42,33 @@ export default function MediaStudio() {
     }, 2000);
     return () => window.clearInterval(timer);
   }, [generation?.id, generation?.status]);
-  const activeStatus = engine?.[kind];
+  const selectedProvider = engine?.providers?.find((item) => item.id === provider);
+  const activeStatus = provider === "comfyui-local"
+    ? engine?.[kind]
+    : selectedProvider
+      ? { ready: selectedProvider.ready && selectedProvider.supports.includes(kind), reason: selectedProvider.supports.includes(kind) ? selectedProvider.reason : `This provider does not support ${kind}.` }
+      : undefined;
   const submit = async () => {
     setError("");
     if (!prompt.trim()) { setError("Enter a prompt before generating."); return; }
     setBusy(true);
     try {
-      const result = await api.generateMedia(kind, prompt);
+      const result = await api.generateMedia(kind, prompt, provider);
       setGeneration(result);
     } catch (e) { setError(e instanceof Error ? e.message : "Could not submit the local workflow."); }
     finally { setBusy(false); }
   };
   return <section className="media-studio">
-    <div className="page-heading media-heading"><div><div className="eyebrow"><span className="eyebrow-line"/> LOCAL GENERATIVE WORKSPACE</div><h1>Create <span>images and video.</span></h1><p>Run locally hosted open-weight models through ComfyUI. No paid generation API is called.</p></div><button className="secondary-button" onClick={() => void refreshEngine()}><RefreshCw size={15}/> Check runtime</button></div>
+    <div className="page-heading media-heading"><div><div className="eyebrow"><span className="eyebrow-line"/> LOCAL GENERATIVE WORKSPACE</div><h1>Create <span>images and video.</span></h1><p>Choose a local workflow or a configured hosted open-model endpoint. Provider quotas and availability vary.</p></div><button className="secondary-button" onClick={() => void refreshEngine()}><RefreshCw size={15}/> Check runtime</button></div>
     <div className="media-grid">
       <section className="panel media-form">
         <div className="panel-heading"><div><span className="step-index">01</span><h2>Generation settings</h2></div><span className="subtle-tag"><Sparkles size={14}/> Self-hosted</span></div>
+        <label className="media-label" htmlFor="media-provider">Provider</label>
+        <select id="media-provider" className="media-provider-select" value={provider} onChange={(event) => setProvider(event.target.value)}>
+          <option value="comfyui-local">Local ComfyUI</option>
+          {(engine?.providers ?? []).map((item: MediaProviderStatus) => <option key={item.id} value={item.id}>{item.name}{item.ready ? "" : " · not configured"}</option>)}
+        </select>
+        {selectedProvider && <p className="media-provider-note">{selectedProvider.free_tier} {selectedProvider.reason}</p>}
         <div className="media-kind-toggle" role="group" aria-label="Generation type">
           <button className={kind === "image" ? "media-kind active" : "media-kind"} onClick={() => { setKind("image"); setGeneration(null); }}><ImageIcon size={17}/> Image</button>
           <button className={kind === "video" ? "media-kind active" : "media-kind"} onClick={() => { setKind("video"); setGeneration(null); }}><Film size={17}/> Video</button>

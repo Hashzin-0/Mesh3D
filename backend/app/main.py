@@ -14,6 +14,7 @@ from .engine_registry import ENGINES, public_engine, resolve_engine
 from .jobs import DATA_DIR, get_job, init_db, list_jobs, public_job, save_job
 from .tasks import run_job
 from .media_engines import media_engine_status as get_media_engine_status, submit_generation, generation_status, read_artifact
+from .remote_media import provider_status, submit_remote_generation, run_remote_generation, remote_generation_status, read_remote_artifact
 
 MAX_FILE_BYTES = int(os.getenv("MESH3D_MAX_IMAGE_BYTES", str(25 * 1024 * 1024)))
 MAX_IMAGES = int(os.getenv("MESH3D_MAX_IMAGES", "80"))
@@ -38,17 +39,24 @@ def health() -> dict:
 
 @app.get("/api/media/engines")
 def media_engines_status() -> dict:
-    return get_media_engine_status()
+    result = get_media_engine_status()
+    result["providers"] = provider_status()
+    return result
 
 
 @app.post("/api/media/generate", status_code=202)
-def media_generate(payload: dict) -> dict:
+def media_generate(background_tasks: BackgroundTasks, payload: dict) -> dict:
     kind = payload.get("kind")
     prompt = payload.get("prompt")
+    provider = payload.get("provider", "comfyui-local")
     if kind not in ("image", "video") or not isinstance(prompt, str):
         raise HTTPException(status_code=422, detail="Provide kind=image|video and a prompt string.")
     try:
-        return submit_generation(kind, prompt)
+        if provider == "comfyui-local":
+            return submit_generation(kind, prompt)
+        result = submit_remote_generation(provider, kind, prompt)
+        background_tasks.add_task(run_remote_generation, result["id"], provider, kind, prompt)
+        return result
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     except RuntimeError as exc:
@@ -58,6 +66,8 @@ def media_generate(payload: dict) -> dict:
 @app.get("/api/media/jobs/{generation_id}")
 def media_job_status(generation_id: str) -> dict:
     try:
+        if generation_id.startswith("remote_"):
+            return remote_generation_status(generation_id)
         return generation_status(generation_id)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
@@ -68,7 +78,10 @@ def media_job_status(generation_id: str) -> dict:
 @app.get("/api/media/artifact")
 def media_artifact(generation_id: str, filename: str, subfolder: str = "", artifact_type: str = "output") -> Response:
     try:
-        content, content_type = read_artifact(generation_id, filename, subfolder, artifact_type)
+        if generation_id.startswith("remote_"):
+            content, content_type = read_remote_artifact(generation_id, filename, artifact_type)
+        else:
+            content, content_type = read_artifact(generation_id, filename, subfolder, artifact_type)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     except RuntimeError as exc:
