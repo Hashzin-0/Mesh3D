@@ -66,7 +66,7 @@ export default function MediaStudio() {
           <div className="generation-status">{["queued", "running"].includes(generation.status) ? <LoaderCircle className="spin" size={17}/> : generation.status === "completed" ? <CheckCircle2 size={17}/> : <AlertCircle size={17}/>}<span>{statusCopy[generation.status] ?? generation.status}</span></div>
           {generation.status === "completed" && (generation.outputs ?? []).length === 0 && <p className="media-result-note">The workflow completed but no supported image/video output was reported. Check its Save Image/Video node and workflow output mapping.</p>}
           <div className="media-artifacts">{(generation.outputs ?? []).map((output, index) => {
-            const url = api.mediaArtifactUrl(output);
+            const url = api.mediaArtifactUrl(output, generation.id);
             const isVideo = /\.(mp4|webm|mov|mkv)$/i.test(output.filename);
             return <div className="media-artifact" key={output.filename + output.subfolder + index}>{isVideo ? <video controls preload="metadata" src={url}/> : <img loading="lazy" src={url} alt={output.filename}/>}<a href={url} download={output.filename}>{output.filename}</a></div>;
           })}</div>
