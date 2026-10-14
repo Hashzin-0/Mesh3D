@@ -20,6 +20,7 @@ def test_submit_injects_prompt_only_into_configured_node(monkeypatch, tmp_path):
     workflow = {"6": {"class_type": "CLIPTextEncode", "inputs": {"text": "old prompt", "clip": ["1", 0]}}}
     path = tmp_path / "image-workflow.json"
     path.write_text(json.dumps(workflow), encoding="utf-8")
+    monkeypatch.setenv("MESH3D_MEDIA_GENERATION_ENABLED", "true")
     monkeypatch.setenv("MESH3D_COMFYUI_URL", "http://localhost:8188")
     monkeypatch.setenv("MESH3D_COMFYUI_IMAGE_WORKFLOW", str(path))
     monkeypatch.setenv("MESH3D_COMFYUI_IMAGE_PROMPT_NODE", "6")
