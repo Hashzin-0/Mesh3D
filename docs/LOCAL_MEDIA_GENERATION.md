@@ -18,12 +18,13 @@ Mesh3D uses a self-hosted ComfyUI instance as the first local generation runtime
 - GET /api/media/jobs/{id}: reads real ComfyUI history and returns generated outputs only after they exist.
 - GET /api/media/artifact: proxies an allow-listed image/video MIME type from the configured ComfyUI instance after validating filename/subfolder references.
 
-The browser never supplies workflow JSON, upstream URLs, file-system paths, command strings or model checkpoints. The ComfyUI URL is operator configuration, not client input.
+The browser never supplies workflow JSON, upstream URLs, file-system paths, command strings or model checkpoints. Generation is disabled by default and requires MESH3D_MEDIA_GENERATION_ENABLED=true on the trusted runtime. The ComfyUI URL is operator configuration, not client input.
 
 ## Configuration
 
 Set these variables in the runtime config or local untracked .env:
 
+- MESH3D_MEDIA_GENERATION_ENABLED (default false; set true only on a trusted runtime)
 - MESH3D_COMFYUI_URL (default http://127.0.0.1:8188)
 - MESH3D_COMFYUI_IMAGE_WORKFLOW
 - MESH3D_COMFYUI_IMAGE_PROMPT_NODE
