@@ -28,7 +28,7 @@ Required environment variables:
 - `GEMINI_API_KEY`: optional; stored only on the worker, never in browser code or Vercel client variables.
 - `MESH3D_GEMINI_MODEL`: optional model ID, default `gemini-2.5-flash`.
 
-The worker's public `/health` endpoint exposes only liveness. `/v1/status`, job creation, job status and artifact retrieval require the bearer token. Put the worker behind HTTPS, restrict network access to the backend where possible, and rotate the token if exposed.
+The worker's public `/health` endpoint exposes only liveness. `/v1/status`, job creation, job status and artifact retrieval require the bearer token. Put the worker behind HTTPS, restrict network access to the backend where possible, and rotate the token if exposed. Render jobs are serialized to avoid concurrent Blender renders exhausting worker memory.
 
 ### On the Vercel backend
 
@@ -38,7 +38,7 @@ Set these server-side environment variables in Vercel project settings (Preview/
 - `MESH3D_BLENDER_WORKER_URL=https://your-private-worker-host`: worker base URL without a trailing slash.
 - `MESH3D_BLENDER_WORKER_TOKEN`: the same secret as the worker's token.
 
-Do not set `GEMINI_API_KEY` as a `VITE_*` variable. The key belongs on the worker. This implementation does not modify any existing `.env*` file or Vercel environment variables.
+Do not set `GEMINI_API_KEY` as a `VITE_*` variable. The key belongs on the worker. This implementation does not modify any existing `.env*` file or Vercel environment variables. **Security gate:** this repository does not currently demonstrate user authentication or per-user quotas for these public API routes. Keep `MESH3D_BLENDER_ENABLED=false` on a public deployment until the app is protected by authentication and rate/usage limits; the worker token authenticates only the backend-to-worker hop, not end users.
 
 ## Detailed script-generation contract
 

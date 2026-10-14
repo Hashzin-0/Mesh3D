@@ -18,6 +18,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from threading import Lock
 
 import numpy as np
 from fastapi import BackgroundTasks, Depends, FastAPI, File, Form, Header, HTTPException, UploadFile
@@ -34,6 +35,7 @@ MAX_PIXELS = 16_000_000
 MAX_ITERATIONS = min(8, max(1, int(os.getenv("MESH3D_BLENDER_MAX_ITERATIONS", "5"))))
 BLENDER_TIMEOUT = min(1800, max(30, int(os.getenv("MESH3D_BLENDER_TIMEOUT_SECONDS", "900"))))
 GEMINI_MODEL = os.getenv("MESH3D_GEMINI_MODEL", "gemini-2.5-flash")
+RENDER_LOCK = Lock()
 SAFE_ID = re.compile(r"^[a-f0-9-]{36}$")
 SAFE_FILENAME = re.compile(r"^[A-Za-z0-9._-]{1,180}$")
 ALLOWED_MIME = {
@@ -502,7 +504,7 @@ def _add_output(job: dict[str, Any], job_dir: Path, filename: str, role: str) ->
         job["outputs"].append(entry)
 
 
-def _run_job(job_id: str) -> None:
+def _run_job_locked(job_id: str) -> None:
     job = _read_job(job_id)
     if not job:
         return
@@ -593,6 +595,12 @@ def _run_job(job_id: str) -> None:
         safe_error = str(exc).replace(str(job_dir), "[worker-job]").replace(str(DATA_DIR), "[worker-data]")
         job.update(status="failed", finished_at=now(), error=safe_error[:1600], iterations=history, updated_at=now())
     _write_job(job)
+
+
+def _run_job(job_id: str) -> None:
+    # A single worker process and render lock prevent simultaneous renders exhausting RAM/CPU.
+    with RENDER_LOCK:
+        _run_job_locked(job_id)
 
 
 @app.post("/v1/jobs", status_code=202, dependencies=[Depends(_authorized)])
