@@ -123,7 +123,11 @@ def generation_status(prompt_id: str) -> dict[str, Any]:
     completed = bool(status_info.get("completed"))
     return {"id": prompt_id, "status": "completed" if completed else "running", "outputs": outputs}
 
-def read_artifact(filename: str, subfolder: str = "", artifact_type: str = "output") -> tuple[bytes, str]:
+def read_artifact(generation_id: str, filename: str, subfolder: str = "", artifact_type: str = "output") -> tuple[bytes, str]:
+    generation = generation_status(generation_id)
+    allowed = any(item["filename"] == filename and item["subfolder"] == subfolder and item["type"] == artifact_type for item in generation.get("outputs", []))
+    if not allowed:
+        raise ValueError("Artifact is not part of the requested generation.")
     if not SAFE_FILENAME.fullmatch(filename) or artifact_type not in ALLOWED_ARTIFACT_TYPES:
         raise ValueError("Invalid artifact reference.")
     if not isinstance(subfolder, str) or Path(subfolder).is_absolute() or ".." in Path(subfolder).parts or "\\" in subfolder:
