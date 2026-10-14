@@ -36,6 +36,6 @@ def test_submit_injects_prompt_only_into_configured_node(monkeypatch, tmp_path):
 
 def test_artifact_validation_rejects_path_traversal():
     with pytest.raises(ValueError, match="Invalid artifact reference"):
-        media_engines.read_artifact("../secret.png")
+        media_engines.read_artifact("abc-123", "../secret.png")
     with pytest.raises(ValueError, match="Invalid artifact subfolder"):
-        media_engines.read_artifact("image.png", "../private")
+        media_engines.read_artifact("abc-123", "image.png", "../private")
