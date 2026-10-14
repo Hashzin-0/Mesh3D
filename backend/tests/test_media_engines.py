@@ -3,6 +3,7 @@ import pytest
 from app import media_engines
 
 def test_media_status_is_explicit_when_workflows_are_not_configured(monkeypatch):
+    monkeypatch.setenv("MESH3D_MEDIA_GENERATION_ENABLED", "false")
     monkeypatch.setattr(media_engines.urllib.request, "urlopen", lambda *args, **kwargs: (_ for _ in ()).throw(OSError("offline")))
     status = media_engines.media_engine_status()
     assert status["engine"] == "comfyui-local"
