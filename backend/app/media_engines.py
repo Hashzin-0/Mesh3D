@@ -29,7 +29,8 @@ def _request_json(url: str, payload: dict[str, Any] | None = None, timeout: floa
 
 def media_engine_status() -> dict[str, Any]:
     url = os.getenv("MESH3D_COMFYUI_URL", DEFAULT_COMFY_URL).rstrip("/")
-    result: dict[str, Any] = {"engine": "comfyui-local", "url": url, "configured": False, "reachable": False}
+    enabled = os.getenv("MESH3D_MEDIA_GENERATION_ENABLED", "false").lower() == "true"
+    result: dict[str, Any] = {"engine": "comfyui-local", "configured": False, "reachable": False, "enabled": enabled}
     try:
         with urllib.request.urlopen(urllib.request.Request(url + "/system_stats"), timeout=2) as response:
             result["reachable"] = response.status == 200
@@ -39,11 +40,12 @@ def media_engine_status() -> dict[str, Any]:
         config = _settings(kind)
         workflow_path = Path(config["workflow"]).expanduser() if config["workflow"] else None
         workflow_exists = bool(workflow_path and workflow_path.is_file())
-        ready = bool(result["reachable"] and workflow_exists and config["prompt_node"])
+        ready = bool(enabled and result["reachable"] and workflow_exists and config["prompt_node"])
         result[kind] = {
             "ready": ready, "workflow_configured": bool(config["workflow"]),
             "workflow_exists": workflow_exists, "prompt_node_configured": bool(config["prompt_node"]),
             "reason": "Ready" if ready else (
+                "Local generation is disabled; set MESH3D_MEDIA_GENERATION_ENABLED=true only on a trusted runtime." if not enabled else
                 "ComfyUI is unreachable; start the local service and verify MESH3D_COMFYUI_URL."
                 if not result["reachable"] else
                 f"Configure MESH3D_COMFYUI_{kind.upper()}_WORKFLOW and MESH3D_COMFYUI_{kind.upper()}_PROMPT_NODE with a reviewed local API workflow."
@@ -60,6 +62,8 @@ def submit_generation(kind: str, prompt: str) -> dict[str, Any]:
         raise ValueError("Prompt is required.")
     if len(prompt) > MAX_PROMPT_CHARS:
         raise ValueError(f"Prompt must be at most {MAX_PROMPT_CHARS} characters.")
+    if os.getenv("MESH3D_MEDIA_GENERATION_ENABLED", "false").lower() != "true":
+        raise RuntimeError("Local media generation is disabled. Enable it only on a trusted runtime.")
     config = _settings(kind)
     workflow_path = Path(config["workflow"]).expanduser() if config["workflow"] else None
     if not workflow_path or not workflow_path.is_file() or not config["prompt_node"]:
