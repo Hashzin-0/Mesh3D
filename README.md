@@ -2,12 +2,12 @@
 
 Mesh3D is an image-to-3D reconstruction studio for comparing real outputs from one image or a multi-view capture. It includes a responsive web client, FastAPI API, an in-process job runner for local development, a gated engine registry, local SQLite metadata, and a Three.js viewer for GLB/GLTF artifacts.
 
-> **Status:** seven concrete upstream adapter entry points are included. Upstream checkouts, engine-specific environments, checkpoints and accelerator runtime remain operator-provisioned. No successful model/GPU smoke test or bundled model weights are claimed. Engines are not considered ready until license gates, wrapper configuration, and a valid real-run validation report are present.
+> **Status:** three adapter entry points ship in the registry — TripoSR, AliceVision/Meshroom, and COLMAP + OpenMVS — each with a validated real-run report from a CPU-only host (2026-10-14). Four candidates (InstantMesh, Stable Fast 3D, Hunyuan3D 2.1, VGGT) were removed after their real-run attempts failed; attempt records are kept under `.validation/reports/`. Upstream checkouts, engine-specific environments, checkpoints and accelerator runtime remain operator-provisioned; no GPU inference or bundled model weights are claimed. An engine is `ready` only with a configured wrapper and a valid real-run validation report.
 
 ## Features
 
 - Responsive Studio for single-image and multi-view intake, thumbnails, removal, and capture guidance.
-- Adapter entry points for TripoSR, InstantMesh, Stable Fast 3D, Hunyuan3D 2.1, AliceVision/Meshroom, COLMAP + OpenMVS, and VGGT.
+- Adapter entry points for TripoSR, AliceVision/Meshroom, and COLMAP + OpenMVS.
 - Server-side image signature, dimensions, file-size, image-count, and duplicate validation.
 - In-process job execution for local development, SQLite job metadata, run logs, output manifest validation, and artifact SHA-256 hashes.
 - Actual GLB/GLTF loading with Three.js. Comparison stays empty until real outputs exist.
@@ -22,7 +22,7 @@ Requirements: Docker Engine and Compose plugin.
 3. For a host configured with the NVIDIA Container Toolkit, use `docker compose -f docker-compose.yml -f docker-compose.gpu.yml up --build` to request GPU access for the API process.
 4. Open `http://localhost:5173`; API health is at `http://localhost:8000/health`, OpenAPI docs at `http://localhost:8000/docs`.
 
-The Studio/API can start without model runtimes. To run reconstruction locally, clone and provision the appropriate upstream engines, configure the environment variables in `.env`, provide compatible GPU/runtime access, and complete the engine-specific license review. Do not set approval flags simply to make a candidate appear enabled.
+The Studio/API can start without model runtimes. To run reconstruction locally, clone and provision the appropriate upstream engines, configure the environment variables in `.env`, provide compatible runtime access, and keep the engine's validation report up to date. There are no approval flags to flip: without a valid report the registry fails closed to `validation_required`.
 
 ## Vercel deployment
 
@@ -36,20 +36,19 @@ The root `vercel.json` defines two deployable services:
 
 Celery and Redis have been removed. The API now schedules the existing runner through FastAPI `BackgroundTasks` in the same invocation. This is a lightweight replacement for local development, **not a durable Vercel worker**. Vercel functions have finite execution time and ephemeral per-instance storage; local SQLite and uploaded/output files are not shared reliably between invocations and must not be used as production persistence.
 
-The seven reconstruction engines are external runtimes that require operator-provisioned repositories, separate environments, checkpoints, and often GPU acceleration. This repository does not bundle those runtimes or weights, and a Vercel Function is not a GPU worker. Therefore this configuration validates service routing and API packaging; it does not establish that model inference, durable job polling, or artifact retention will work on Vercel. Production reconstruction requires a separate durable compute/storage architecture, which is intentionally not introduced here because the selected persistence option was `keep-local` and bindings were set to `none`.
+The reconstruction engines are external runtimes that require operator-provisioned repositories, separate environments, checkpoints, and often GPU acceleration. This repository does not bundle those runtimes or weights, and a Vercel Function is not a GPU worker. Therefore this configuration validates service routing and API packaging; it does not establish that model inference, durable job polling, or artifact retention will work on Vercel. Production reconstruction requires a separate durable compute/storage architecture, which is intentionally not introduced here because the selected persistence option was `keep-local` and bindings were set to `none`.
 
 Vercel Services must also be enabled as the project's framework in Vercel project settings; the presence of `services` in `vercel.json` alone does not switch that dashboard setting.
 
 ## Engine integration
 
-See [Engine integration and runtime setup](docs/ENGINE_INTEGRATION.md), the [wrapper contract](engine-wrappers/README.md), [.env.example](.env.example), [engine provenance register](docs/ENGINE_PROVENANCE.md), [real engine test report template](docs/ENGINE_TEST_REPORT.md), and the [evidence-based activation gate](docs/ENGINE_VALIDATION_GATE.md).
+See [Engine integration and runtime setup](docs/ENGINE_INTEGRATION.md), the [wrapper contract](engine-wrappers/README.md), [.env.example](.env.example), [engine provenance register](docs/ENGINE_PROVENANCE.md), [real engine test report](docs/ENGINE_TEST_REPORT.md), and the [evidence-based activation gate](docs/ENGINE_VALIDATION_GATE.md).
 
 Important distinctions:
-- The four single-image engines use different dependency and checkpoint stacks; keep their Python environments separate.
+- TripoSR uses its own pinned Python environment; Meshroom and COLMAP + OpenMVS run their own binaries. Keep the stacks separate.
 - Meshroom and COLMAP + OpenMVS are photogrammetry pipelines for multi-view captures.
-- VGGT outputs camera/scene geometry and point-cloud data; it is not automatically a textured watertight mesh.
 - The viewer currently targets GLB/GLTF. Other supported artifacts may be delivered as files but are not guaranteed to preview in the in-app viewer.
-- The registry requires an explicit license approval, configured wrapper, additional review where applicable, and a machine-readable report from a real run before it can return `ready`.
+- The registry requires a configured wrapper command and a machine-readable real-run validation report — including the embedded `license_review` decision — before it can return `ready`. Legacy `*_LICENSE_APPROVED` environment flags no longer exist.
 - The generic runner is for controlled local evaluation, not a hardened multi-tenant public service. Public deployment still needs worker isolation, authentication/authorization, quotas, network restrictions, retention policy, and deployment-grade storage.
 
 ## Checks

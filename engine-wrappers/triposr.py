@@ -10,8 +10,14 @@ root = Path(required_env("MESH3D_TRIPOSR_ROOT")).resolve()
 run_py = root / "run.py"
 if not run_py.is_file():
     raise SystemExit(f"TripoSR checkout does not contain run.py: {root}")
-argv = [engine_python("MESH3D_TRIPOSR", root), str(run_py), str(images[0]), "--output-dir", str(args.output_dir.resolve())]
+argv = [engine_python("MESH3D_TRIPOSR", root), str(run_py), str(images[0]), "--output-dir", str(args.output_dir.resolve()), "--device", os.getenv("MESH3D_TRIPOSR_DEVICE", "cpu")]
 if os.getenv("MESH3D_TRIPOSR_BAKE_TEXTURE", "true").lower() == "true":
     argv.append("--bake-texture")
+chunk_size = os.getenv("MESH3D_TRIPOSR_CHUNK_SIZE", "").strip()
+if chunk_size.isdigit():
+    argv.extend(["--chunk-size", chunk_size])
+mc_resolution = os.getenv("MESH3D_TRIPOSR_MC_RESOLUTION", "").strip()
+if mc_resolution.isdigit():
+    argv.extend(["--mc-resolution", mc_resolution])
 run_command(argv, cwd=root)
 write_manifest(args.output_dir, collect_outputs(args.output_dir))

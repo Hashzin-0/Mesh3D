@@ -24,11 +24,11 @@ Updated: 2026-10-13
 |---|---|---|
 | Project rules and threat model | Drafted | Version-controlled documents in this branch; controls not implemented |
 | Queue/storage/worker ADRs | Drafted | Two proposed ADRs; provider choice remains open |
-| Candidate upstream and license register | Partial | Candidate sources and known gates recorded; exact revisions, hashes, full dependency audits, and deployment reviews remain pending |
-| Rights-cleared real test sets | Blocked | No fixture added; source/permission must be documented before use |
-| Hardware profiles and measured baseline | Blocked | No execution environment or engine runtime available through the repository editing connector |
-| Real engine smoke tests | Not started | Requires a provisioned CPU/GPU runtime and actual model downloads |
+| Candidate upstream and license register | Done for shipped engines | Register updated with exact commits, checkpoint hashes, licenses, and validation reports for the three shipped engines; failed candidates recorded with attempt evidence and removed from the registry (`ENGINE_PROVENANCE.md`) |
+| Rights-cleared real test sets | Done | Self-generated synthetic fixtures with provenance: `.validation/fixtures/PROVENANCE.json`, input SHA-256 digests recorded in `ENGINE_TEST_REPORT.md` |
+| Hardware profiles and measured baseline | Done | CPU-only host profiled during real runs (AMD EPYC 7763, 2 cores, 7.76 GB RAM, no GPU); no GPU baseline exists on this host |
+| Real engine smoke tests | Partial | 3 of 7 candidates passed real-run validation (TripoSR, Meshroom, COLMAP+OpenMVS; reports in `.validation/reports/`); 4 failed and were removed from the registry (attempt records kept). GPU inference untested — no accelerator on this host |
 
 ## Next gate
 
-Phase 0 is **not complete**. The next meaningful implementation gate is to provision/identify an execution environment, select and document a rights-cleared real fixture for each mode, pin immutable engine revisions and checkpoints, and run the first real smoke tests. Do not build a benchmark dashboard that implies results exist before those runs.
+Phase 0 is **not complete** because GPU inference, full-pipeline (CUDA depth) runs, and quality comparisons remain untested on this CPU-only host. The next meaningful implementation gate is to run at least one engine on GPU-equipped hardware, measure a baseline against the documented protocol, and only then consider re-adding candidates that failed solely for hardware reasons (Hunyuan3D, VGGT) — each with a fresh real-run attempt and report. Do not build a benchmark dashboard that implies results exist beyond the three documented runs.

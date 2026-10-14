@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "engine_id": "stable_fast_3d",
+  "result": "failed",
+  "attempted_at": "2026-10-14",
+  "upstream_commit": "ff21fc491b4dc5314bf6734c7c0dabd86b5f5bb2",
+  "hardware": {
+    "cpu": "AMD EPYC 7763 64-Core Processor (2 cores available to container)",
+    "accelerator": "none (no CUDA/ROCm device present)",
+    "ram_gb": 7.76
+  },
+  "attempt_env_lock_sha256": "d95309bc0b5bc795180cde9aaf03dac1d40b771f466ff62dee61a6e8be296b46",
+  "exit_code": 1,
+  "elapsed_seconds": 7,
+  "failure_stage": "checkpoint_download",
+  "failure_summary": "SF3D.from_pretrained() aborted on huggingface_hub GatedRepoError 401 downloading stabilityai/stable-fast-3d config.yaml: the checkpoint repository is gated and this host has no authenticated HF token with granted access.",
+  "blockers": [
+    "Gated Hugging Face checkpoint (stabilityai/stable-fast-3d): access must be requested and approved upstream, then an HF token with read permission must be provisioned on the inference host.",
+    "Stability AI Community License review required (commercial use above USD 1,000,000 annual revenue must be registered with Stability AI)."
+  ],
+  "evidence": {
+    "wrapper": "engine-wrappers/stable_fast_3d.py",
+    "run_log": ".validation/runs/stable_fast_3d/logs/run.log",
+    "log_tail": "huggingface_hub.errors.GatedRepoError: 401 Client Error ... Cannot access gated repo ... stabilityai/stable-fast-3d ... You must have access to it and be authenticated",
+    "earlier_api_probe": "Direct hf_hub_download probe without token also returned GatedRepoError 401 for model.safetensors and config.json.",
+    "deps_note": "Repo requirements satisfied in attempt venv: jaxtyping, uv_unwrapper and texture_baker (CPU build, USE_CUDA auto-off) installed before the run; failure is the gated checkpoint itself, not missing code."
+  }
+}

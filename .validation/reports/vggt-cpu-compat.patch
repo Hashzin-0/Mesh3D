@@ -1,0 +1,17 @@
+diff --git a/demo_colmap.py b/demo_colmap.py
+index 836af17..c033ac6 100644
+--- a/demo_colmap.py
++++ b/demo_colmap.py
+@@ -104,7 +104,11 @@ def demo_fn(args):
+     print(f"Setting seed as: {args.seed}")
+ 
+     # Set device and dtype
+-    dtype = torch.bfloat16 if torch.cuda.get_device_capability()[0] >= 8 else torch.float16
++    # Mesh3D local compat patch: upstream called torch.cuda.get_device_capability() unconditionally and crashed on CPU-only hosts.
++    if torch.cuda.is_available():
++        dtype = torch.bfloat16 if torch.cuda.get_device_capability()[0] >= 8 else torch.float16
++    else:
++        dtype = torch.float32
+     device = "cuda" if torch.cuda.is_available() else "cpu"
+     print(f"Using device: {device}")
+     print(f"Using dtype: {dtype}")

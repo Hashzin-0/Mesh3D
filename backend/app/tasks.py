@@ -19,9 +19,8 @@ def _engine_environment(run_dir: Path) -> dict[str, str]:
     """Pass only runtime configuration needed by adapters; never pass arbitrary host secrets."""
     base_keys = {"PATH", "LANG", "LC_ALL", "CUDA_VISIBLE_DEVICES", "NVIDIA_VISIBLE_DEVICES", "LD_LIBRARY_PATH"}
     prefixes = (
-        "MESH3D_TRIPOSR_", "MESH3D_INSTANTMESH_", "MESH3D_STABLE_FAST_3D_",
-        "MESH3D_HUNYUAN3D_", "MESH3D_MESHROOM_", "MESH3D_COLMAP_", "MESH3D_OPENMVS_",
-        "MESH3D_VGGT_",
+        "MESH3D_TRIPOSR_",
+        "MESH3D_MESHROOM_", "MESH3D_COLMAP_", "MESH3D_OPENMVS_",
     )
     safe_env = {key: value for key, value in os.environ.items() if key in base_keys or key.startswith(prefixes)}
     for key in ("HF_HOME", "HF_HUB_CACHE", "TRANSFORMERS_CACHE", "TORCH_HOME", "PYTHONPATH"):

@@ -1,5 +1,5 @@
 export type Mode = "single_image" | "multi_view";
-export type Engine = { id: string; name: string; mode: Mode; upstream: string; license: string; status: "ready" | "not_configured" | "license_review" | "disabled"; reason: string; outputs: string[]; description: string };
+export type Engine = { id: string; name: string; mode: Mode; upstream: string; license: string; status: "ready" | "not_configured" | "validation_required" | "disabled"; reason: string; outputs: string[]; description: string };
 export type Artifact = { name: string; format: string; url: string; bytes?: number; sha256?: string };
 export type Run = { engine_id: string; engine_name: string; status: string; started_at?: string; finished_at?: string; elapsed_seconds?: number; error?: string; artifacts: Artifact[]; log?: string };
 export type Job = { id: string; mode: Mode; status: string; created_at: string; image_count: number; runs: Run[]; error?: string };

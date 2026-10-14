@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "engine_id": "hunyuan3d",
+  "result": "failed",
+  "attempted_at": "2026-10-14",
+  "upstream_commit": "82920d643c0dc2f7bfd7255f45f62d386edfe60c",
+  "hardware": {
+    "cpu": "AMD EPYC 7763 64-Core Processor (2 cores available to container)",
+    "accelerator": "none (no CUDA/ROCm device present)",
+    "ram_gb": 7.76
+  },
+  "attempt_env_lock_sha256": "d95309bc0b5bc795180cde9aaf03dac1d40b771f466ff62dee61a6e8be296b46",
+  "exit_code": -15,
+  "elapsed_seconds": 210,
+  "failure_stage": "checkpoint_load",
+  "failure_summary": "Checkpoint download succeeded (tencent/Hunyuan3D-2.1 hunyuan3d-dit-v2-1/model.fp16.ckpt, 7366389768 bytes), then the process was terminated by SIGTERM from PID 0 (host OOM killer) during torch.load(map_location='cpu') in Hunyuan3DDiTFlowMatchingPipeline.from_single_file, before any inference. A 7.4GB fp16 state dict plus fp32 model instantiation cannot fit the host's ~4-5GB available RAM.",
+  "blockers": [
+    "Insufficient RAM on host: 7.4GB checkpoint cannot be loaded (process OOM-killed during torch.load).",
+    "CPU inference would additionally require fp32 weights (~14GB) for the DiT+VAE path on this host.",
+    "License: Tencent Hunyuan 3D 2.1 Community License excludes EU/UK/South Korea and imposes territory/usage terms that must be accepted for deployment (extra-review engine)."
+  ],
+  "evidence": {
+    "wrapper": "engine-wrappers/hunyuan3d.py",
+    "run_log": ".validation/runs/hunyuan3d/logs/run.log",
+    "log_tail": "'Loading model from .../model.fp16.ckpt' then 'Hunyuan3D upstream pipeline exited with code -15.'",
+    "checkpoint_sha256_evidence": ".validation/runs/hunyuan3d/logs/checkpoint-sha256.txt",
+    "checkpoint_sha256": "6b519fc7242f78e9b5f47ea4d55668fe3d944a2d27332f4ca68d29a6ff603f5e",
+    "checkpoint_bytes": 7366389768,
+    "cleanup_note": "Checkpoint was hashed then deleted from ~/.cache/hy3dgen to reclaim the root filesystem; re-download is reproducible from HF."
+  }
+}

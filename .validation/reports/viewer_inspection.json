@@ -1,0 +1,86 @@
+{
+  "triposr": {
+    "loader": "trimesh5.1.1 load + Scene concatenation (programmatic viewer inspection, headless)",
+    "vertices": 15391,
+    "faces": 30684,
+    "is_watertight": false,
+    "bounds_min": [
+      -0.24431,
+      -0.18082,
+      -0.17648
+    ],
+    "bounds_max": [
+      0.37437,
+      0.43254,
+      0.4209
+    ],
+    "extents": [
+      0.61867,
+      0.61335,
+      0.59738
+    ],
+    "finite_vertices": true,
+    "degenerate_faces": 0,
+    "visual_type": "ColorVisuals"
+  },
+  "meshroom": {
+    "loader": "trimesh5.1.1 load + Scene concatenation (programmatic viewer inspection, headless)",
+    "vertices": 2611,
+    "faces": 3996,
+    "is_watertight": false,
+    "bounds_min": [
+      0.15284,
+      0.01191,
+      -1.10387
+    ],
+    "bounds_max": [
+      1.0685,
+      0.6742,
+      0.08088
+    ],
+    "extents": [
+      0.91566,
+      0.66229,
+      1.18475
+    ],
+    "finite_vertices": true,
+    "degenerate_faces": 0,
+    "visual_type": "TextureVisuals",
+    "uv_present": true,
+    "uv_shape": [
+      2611,
+      2
+    ],
+    "material": "SimpleMaterial"
+  },
+  "colmap_openmvs": {
+    "loader": "trimesh5.1.1 load + Scene concatenation (programmatic viewer inspection, headless)",
+    "vertices": 28731,
+    "faces": 50860,
+    "is_watertight": false,
+    "bounds_min": [
+      1.14848,
+      -0.37264,
+      1.45505
+    ],
+    "bounds_max": [
+      4.98637,
+      2.0256,
+      4.07443
+    ],
+    "extents": [
+      3.8379,
+      2.39824,
+      2.61937
+    ],
+    "finite_vertices": true,
+    "degenerate_faces": 0,
+    "visual_type": "TextureVisuals",
+    "uv_present": true,
+    "uv_shape": [
+      28731,
+      2
+    ],
+    "material": "SimpleMaterial"
+  }
+}

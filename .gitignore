@@ -20,3 +20,6 @@ engine-checkpoints/
 *.obj
 *.ply
 *.stl
+# Heavy local validation artifacts (large checkouts, run caches/logs). Reports + fixtures stay tracked.
+.validation/runs/
+tsconfig.tsbuildinfo

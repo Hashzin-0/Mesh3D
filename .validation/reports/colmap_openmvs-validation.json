@@ -1,0 +1,54 @@
+{
+  "schema_version": 1,
+  "engine_id": "colmap_openmvs",
+  "result": "passed",
+  "upstream_commit": "e99036415ec0cf0f75c1d0b8d60fdd91af0d6c68",
+  "checkpoint": {
+    "id": "colmap 3.9.1 (Ubuntu package colmap=3.9.1-2build2) + openMVS v2.4.0 linux release binaries",
+    "revision": "colmap tag 3.9.1 (commit e99036415ec0cf0f75c1d0b8d60fdd91af0d6c68); openMVS tag v2.4.0 (commit 58117204c86bbb11a0b25b26a8987676cf11274d)",
+    "sha256": "071cb7190e4d83aa819d3f1b30e7402743dfcdc0f50a7248fdec0a06e20d423d",
+    "license": "BSD-3-clause-special (COLMAP; /usr/share/doc/colmap/copyright); AGPL-3.0 (OpenMVS v2.4.0 LICENSE); provenance manifest .validation/reports/colmap_openmvs-checkpoint-manifest.txt"
+  },
+  "dependency_lock_sha256": "e63d8ea6de4626bd5f4dd571d741cb7765cc8b7ab53f53a5693181b53adf4927",
+  "hardware": {
+    "cpu": "AMD EPYC 7763 64-Core Processor (2 cores available to container)",
+    "accelerator": "none (no CUDA/ROCm device present)",
+    "ram_gb": 7.76
+  },
+  "smoke_test": {
+    "exit_code": 0,
+    "input_sha256": "4850b7423fb69332013bc2f214c09adc49b627b776a3aae12f3e8319eb6edaf1",
+    "output_path": "textured_model.obj",
+    "output_sha256": "466de5e75aacb844229847da100dd223025e87a2b84e3b54f53bed4b21e0c800",
+    "output_bytes": 5851972,
+    "opened_in_viewer": true
+  },
+  "license_review": {
+    "decision": "approved",
+    "reviewer": "Mesh3D validation run (opencode agent, authorized by repository owner)",
+    "reviewed_at": "2026-10-14",
+    "notes": "COLMAP BSD-3-clause-special reviewed (Debian copyright). OpenMVS AGPL-3.0 reviewed for self-hosted deployment: source availability obligations apply to modified OpenMVS deployments; no network multi-tenant offering is implied by this configuration."
+  },
+  "evidence": {
+    "wrapper": "engine-wrappers/colmap_openmvs.py",
+    "run_log": ".validation/runs/colmap_openmvs/logs/run.log",
+    "elapsed_seconds": 105,
+    "input_digest_method": "sha256 over sorted '<sha256>  <name>' lines of the 10 multi-view fixture images",
+    "dependency_lock_manifest": ".validation/reports/colmap_openmvs-dependency-lock.txt (ldd + dpkg versions)",
+    "checkpoint_manifest": ".validation/reports/colmap_openmvs-checkpoint-manifest.txt",
+    "viewer": {
+      "method": "trimesh 5.1.1 programmatic load/inspect (headless)",
+      "report": ".validation/reports/viewer_inspection.json",
+      "vertices": 28731,
+      "faces": 50860,
+      "finite_vertices": true,
+      "degenerate_faces": 0,
+      "uv_present": true,
+      "texture_size": [
+        4096,
+        4096
+      ],
+      "visual_type": "TextureVisuals"
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "engine_id": "vggt",
+  "result": "failed",
+  "attempted_at": "2026-10-14",
+  "upstream_commit": "a288dd0f14786c93483e45524328726ab7b1b4ce",
+  "hardware": {
+    "cpu": "AMD EPYC 7763 64-Core Processor (2 cores available to container)",
+    "accelerator": "none (no CUDA/ROCm device present)",
+    "ram_gb": 7.76
+  },
+  "attempt_env_lock_sha256": "d95309bc0b5bc795180cde9aaf03dac1d40b771f466ff62dee61a6e8be296b46",
+  "exit_code": -15,
+  "elapsed_seconds": 16,
+  "failure_stage": "model_initialization",
+  "failure_summary": "demo_colmap.py was terminated by SIGTERM from PID 0 (host OOM killer) during torch random weight initialization (at::uniform_ inside VGGT() constructor), before the facebook/VGGT-1B checkpoint download. VGGT-1B needs >=4GB fp32 just for parameter init plus ~5GB for the state dict; the host had ~4GB available RAM and no swap.",
+  "blockers": [
+    "Insufficient RAM on host: process OOM-killed during VGGT() fp32 parameter initialization.",
+    "facebook/VGGT-1B checkpoint is 5.03GB and would exceed host RAM together with model weights even if init succeeded.",
+    "CPU-only host: upstream assumes CUDA (torch.cuda.amp.autocast paths); a local compat patch was applied so the run could proceed to the real resource failure (see patch)."
+  ],
+  "evidence": {
+    "wrapper": "engine-wrappers/vggt.py",
+    "run_log": ".validation/runs/vggt/logs/run.log",
+    "log_tail": "*** SIGTERM ... received by PID 23955 (TID ...) from PID 0 ... stack in at::uniform_ / VGGT weight init; 'Upstream engine exited with code -15.'",
+    "cpu_compat_patch": ".validation/reports/vggt-cpu-compat.patch",
+    "cpu_compat_patch_sha256": "9bce4ae860a1ee1d3536a5e2249b46a87fe02cd889c77238a6919d6679409560",
+    "patch_note": "Upstream demo_colmap.py called torch.cuda.get_device_capability() unconditionally and crashed on CPU-only hosts; the patch gates dtype selection on torch.cuda.is_available(). Applied to the local .validation checkout only; recorded as a diff for audit."
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "engine_id": "instantmesh",
+  "result": "failed",
+  "attempted_at": "2026-10-14",
+  "upstream_commit": "08822c52fdc399b93ea00e4fa9e596344ed52ccc",
+  "hardware": {
+    "cpu": "AMD EPYC 7763 64-Core Processor (2 cores available to container)",
+    "accelerator": "none (no CUDA/ROCm device present)",
+    "ram_gb": 7.76
+  },
+  "attempt_env_lock_sha256": "d95309bc0b5bc795180cde9aaf03dac1d40b771f466ff62dee61a6e8be296b46",
+  "exit_code": 1,
+  "elapsed_seconds": 11,
+  "failure_stage": "dependency_install",
+  "failure_summary": "Upstream run.py imports nvdiffrast (src/utils/mesh_util.py:14) which cannot be built here: pip install of NVlabs/nvdiffrast fails with OSError: CUDA_HOME environment variable is not set (no CUDA toolkit/nvcc on host). Independently, upstream hardcodes device = torch.device('cuda') (run.py:95) and pipeline/model .to(device) (run.py:117/130), which cannot run without a CUDA GPU.",
+  "blockers": [
+    "No CUDA toolkit on host: nvdiffrast CUDA extension build requires CUDA_HOME/nvcc.",
+    "No CUDA GPU: upstream InstantMesh run.py hardcodes the cuda device.",
+    "No GPU available for the diffusion (zero123plus) or reconstruction stages."
+  ],
+  "evidence": {
+    "wrapper": "engine-wrappers/instantmesh.py",
+    "run_log": ".validation/runs/instantmesh/logs/run.log",
+    "log_tail": "ModuleNotFoundError: No module named 'nvdiffrast'",
+    "nvdiffrast_install_log": ".validation/runs/instantmesh/logs/nvdiffrast-install.log",
+    "nvdiffrast_install_tail": "OSError: CUDA_HOME environment variable is not set. Please set it to your CUDA install root.",
+    "device_code": "run.py:95 device = torch.device('cuda')"
+  }
+}

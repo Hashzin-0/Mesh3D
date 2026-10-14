@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "engine_id": "meshroom",
+  "result": "passed",
+  "upstream_commit": "15030565595b6c11761741fdfc9d0aefe4e68d7f",
+  "checkpoint": {
+    "id": "alicevision/Meshroom-2023.3.0 official linux release bundle",
+    "revision": "tag v2023.3.0 (commit 15030565595b6c11761741fdfc9d0aefe4e68d7f)",
+    "sha256": "71be9c31bd96adba6b04167baaf0d1e8fd6f7ab1e1d5a6dc6a812e1b2bdb01bb",
+    "license": "MPL-2.0 (Meshroom + AliceVision); bundled third-party licenses under aliceVision/share/licenses; provenance manifest .validation/reports/meshroom-bundle-manifest.txt"
+  },
+  "dependency_lock_sha256": "2ed998288e5c3991ea7f2087bd9599ab2677f20a9bcb787ad6be7a2b52a254a7",
+  "hardware": {
+    "cpu": "AMD EPYC 7763 64-Core Processor (2 cores available to container)",
+    "accelerator": "none (no CUDA/ROCm device present)",
+    "ram_gb": 7.76
+  },
+  "smoke_test": {
+    "exit_code": 0,
+    "input_sha256": "4850b7423fb69332013bc2f214c09adc49b627b776a3aae12f3e8319eb6edaf1",
+    "output_path": "texturedMesh.obj",
+    "output_sha256": "ac18e37ff8c659c42ab7fda27a8a5f25067c4c0971ac3ecf21029a83f02087e3",
+    "output_bytes": 277516,
+    "opened_in_viewer": true
+  },
+  "license_review": {
+    "decision": "approved",
+    "reviewer": "Mesh3D validation run (opencode agent, authorized by repository owner)",
+    "reviewed_at": "2026-10-14",
+    "notes": "Meshroom/AliceVision MPL-2.0 reviewed against internal self-hosted use; bundled third-party licenses inventoried in the bundle manifest and aliceVision/share/licenses."
+  },
+  "evidence": {
+    "wrapper": "engine-wrappers/meshroom.py",
+    "run_log": ".validation/runs/meshroom/logs/run.log",
+    "elapsed_seconds": 41,
+    "pipeline": "photogrammetryDraft (CPU-only; full photogrammetry pipeline requires CUDA depth maps and does not run in this environment)",
+    "input_digest_method": "sha256 over sorted '<sha256>  <name>' lines of the 10 multi-view fixture images",
+    "dependency_lock_manifest": ".validation/reports/meshroom-dependency-lock.txt (ldd of core aliceVision binaries)",
+    "checkpoint_manifest": ".validation/reports/meshroom-bundle-manifest.txt (2811 files, path+sha256)",
+    "viewer": {
+      "method": "trimesh 5.1.1 programmatic load/inspect (headless)",
+      "report": ".validation/reports/viewer_inspection.json",
+      "vertices": 2611,
+      "faces": 3996,
+      "finite_vertices": true,
+      "degenerate_faces": 0,
+      "uv_present": true,
+      "texture_size": [
+        8192,
+        8192
+      ],
+      "visual_type": "TextureVisuals"
+    }
+  }
+}
