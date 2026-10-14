@@ -126,7 +126,7 @@ def submit_blender_job(kind: str, prompt: str, reference_name: str | None = None
     field("kind", kind)
     field("prompt", prompt)
     if reference_bytes is not None:
-        safe_name = (reference_name or "reference.png").replace('"', "").replace("\\", "_").replace("/", "_")[:120]
+        safe_name = re.sub(r"[^A-Za-z0-9._-]", "_", reference_name or "reference.png")[:120] or "reference.png"
         mime = reference_content_type or "image/png"
         chunks.extend([
             f"--{boundary}\r\n".encode(),
