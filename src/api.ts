@@ -3,7 +3,10 @@ export type Engine = { id: string; name: string; mode: Mode; upstream: string; l
 export type Artifact = { name: string; format: string; url: string; bytes?: number; sha256?: string };
 export type Run = { engine_id: string; engine_name: string; status: string; started_at?: string; finished_at?: string; elapsed_seconds?: number; error?: string; artifacts: Artifact[]; log?: string };
 export type Job = { id: string; mode: Mode; status: string; created_at: string; image_count: number; runs: Run[]; error?: string };
-const base = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") ?? "http://localhost:8000";
+
+// In production the browser and API share the Vercel deployment origin.
+// Keep VITE_API_BASE_URL as an explicit override for local/dev deployments only.
+const base = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") ?? "";
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(base + path, init);
   if (!response.ok) {
