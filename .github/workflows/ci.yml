@@ -30,3 +30,7 @@ jobs:
       - run: pytest
         working-directory: backend
       - run: python -m compileall -q engine-wrappers
+      - run: pip install -r requirements.txt pytest
+        working-directory: blender-worker
+      - run: pytest -q
+        working-directory: blender-worker

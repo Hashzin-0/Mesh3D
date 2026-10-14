@@ -26,6 +26,16 @@ export const api = {
     files.forEach((file) => data.append("images", file, file.name));
     return request<Job>("/api/jobs", { method: "POST", body: data });
   },
+  blenderEngine: () => request<BlenderEngineStatus>("/api/blender/engine"),
+  createBlenderJob: (kind: "image" | "video", prompt: string, reference?: File) => {
+    const data = new FormData();
+    data.append("kind", kind);
+    data.append("prompt", prompt);
+    if (reference) data.append("reference_image", reference, reference.name);
+    return request<BlenderJob>("/api/blender/jobs", { method: "POST", body: data });
+  },
+  blenderJob: (id: string) => request<BlenderJob>(`/api/blender/jobs/${encodeURIComponent(id)}`),
+  blenderArtifactUrl: (id: string, filename: string) => `${base}/api/blender/artifact/${encodeURIComponent(id)}/${encodeURIComponent(filename)}`,
   mediaEngines: () => request<MediaEngineStatus>("/api/media/engines"),
   generateMedia: (kind: "image" | "video", prompt: string) => request<MediaGeneration>("/api/media/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind, prompt }) }),
   mediaJob: (id: string) => request<MediaGeneration>(`/api/media/jobs/${encodeURIComponent(id)}`),
@@ -40,3 +50,24 @@ export type MediaWorkflowStatus = { ready: boolean; workflow_configured: boolean
 export type MediaEngineStatus = { engine: string; configured: boolean; reachable: boolean; enabled: boolean; image: MediaWorkflowStatus; video: MediaWorkflowStatus };
 export type MediaOutput = { filename: string; subfolder: string; type: string };
 export type MediaGeneration = { id: string; kind?: "image" | "video"; status: string; engine?: string; outputs?: MediaOutput[] };
+
+
+export type BlenderEngineStatus = {
+  engine: string; name: string; configured: boolean; ready: boolean; reachable: boolean;
+  blender_version?: string | null; gemini_configured: boolean; max_iterations: number; reason: string;
+};
+export type BlenderMetrics = {
+  exact_pixel_match: boolean; exact_pixel_count: number; changed_pixel_count: number; pixel_count: number;
+  mean_absolute_error: number; rmse: number; psnr_db: number | null; width: number; height: number;
+};
+export type BlenderIteration = {
+  iteration: number; preview: string; diff?: string | null; script: string; blend: string;
+  metrics?: BlenderMetrics | null; review: string;
+};
+export type BlenderOutput = { filename: string; role: string; content_type: string; bytes: number; sha256: string };
+export type BlenderJob = {
+  id: string; kind: "image" | "video"; status: string; progress: number; created_at: string;
+  reference_attached: boolean; gemini_refinement_enabled: boolean; max_iterations: number;
+  current_iteration?: number; iterations: BlenderIteration[]; outputs: BlenderOutput[];
+  exact_pixel_match?: boolean | null; error?: string | null;
+};

@@ -14,6 +14,7 @@ from .engine_registry import ENGINES, public_engine, resolve_engine
 from .jobs import DATA_DIR, get_job, init_db, list_jobs, public_job, save_job
 from .tasks import run_job
 from .media_engines import media_engine_status as get_media_engine_status, submit_generation, generation_status, read_artifact
+from .blender_engine import blender_engine_status, submit_blender_job, blender_job_status, read_blender_artifact, MAX_REFERENCE_BYTES
 
 MAX_FILE_BYTES = int(os.getenv("MESH3D_MAX_IMAGE_BYTES", str(25 * 1024 * 1024)))
 MAX_IMAGES = int(os.getenv("MESH3D_MAX_IMAGES", "80"))
@@ -74,6 +75,57 @@ def media_artifact(generation_id: str, filename: str, subfolder: str = "", artif
     except RuntimeError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc
     return Response(content=content, media_type=content_type, headers={"Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"})
+
+
+@app.get("/api/blender/engine")
+def blender_engine() -> dict:
+    return blender_engine_status()
+
+
+@app.post("/api/blender/jobs", status_code=202)
+async def blender_generate(
+    kind: Annotated[str, Form()],
+    prompt: Annotated[str, Form()],
+    reference_image: UploadFile | None = File(default=None),
+) -> dict:
+    reference_bytes = None
+    reference_name = None
+    reference_type = None
+    if reference_image is not None:
+        reference_name = reference_image.filename
+        reference_type = reference_image.content_type
+        reference_bytes = await reference_image.read(MAX_REFERENCE_BYTES + 1)
+        if not reference_bytes:
+            raise HTTPException(status_code=400, detail="Reference image is empty.")
+        if len(reference_bytes) > MAX_REFERENCE_BYTES:
+            raise HTTPException(status_code=413, detail="Reference image exceeds the 20 MB limit.")
+    try:
+        return submit_blender_job(kind, prompt, reference_name, reference_bytes, reference_type)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@app.get("/api/blender/jobs/{job_id}")
+def blender_job(job_id: str) -> dict:
+    try:
+        return blender_job_status(job_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+
+
+@app.get("/api/blender/artifact/{job_id}/{filename}")
+def blender_artifact(job_id: str, filename: str) -> Response:
+    try:
+        content, content_type = read_blender_artifact(job_id, filename)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail="Artifact not found.") from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    return Response(content=content, media_type=content_type, headers={"Cache-Control": "private, no-store", "X-Content-Type-Options": "nosniff"})
 
 
 @app.get("/api/engines")

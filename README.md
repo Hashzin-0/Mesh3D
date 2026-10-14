@@ -40,6 +40,12 @@ The reconstruction engines are external runtimes that require operator-provision
 
 Vercel Services must also be enabled as the project's framework in Vercel project settings; the presence of `services` in `vercel.json` alone does not switch that dashboard setting.
 
+## Blender + Python + Gemini (optional)
+
+The `Blender + Python` workspace uses a separate Docker worker because Vercel Functions are not a Blender/GPU runtime. Deploy `blender-worker/` with a persistent `/data` volume, then configure `MESH3D_BLENDER_ENABLED`, `MESH3D_BLENDER_WORKER_URL`, and `MESH3D_BLENDER_WORKER_TOKEN` on the Vercel backend. Optionally set `GEMINI_API_KEY` on the worker to enable script generation/revision with reference-image comparison. Setup, script-generation instructions, security limits, API contracts, and verification steps: [Blender + Python + Gemini engine](docs/BLENDER_PYTHON_GEMINI_ENGINE.md).
+
+Pixel-exact equality is measured rather than assumed; the feedback loop stops on exact equality or at its configured iteration limit.
+
 ## Engine integration
 
 See [Engine integration and runtime setup](docs/ENGINE_INTEGRATION.md), the [wrapper contract](engine-wrappers/README.md), [.env.example](.env.example), [engine provenance register](docs/ENGINE_PROVENANCE.md), [real engine test report](docs/ENGINE_TEST_REPORT.md), and the [evidence-based activation gate](docs/ENGINE_VALIDATION_GATE.md).
