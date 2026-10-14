@@ -124,14 +124,14 @@ def generation_status(prompt_id: str) -> dict[str, Any]:
     return {"id": prompt_id, "status": "completed" if completed else "running", "outputs": outputs}
 
 def read_artifact(generation_id: str, filename: str, subfolder: str = "", artifact_type: str = "output") -> tuple[bytes, str]:
-    generation = generation_status(generation_id)
-    allowed = any(item["filename"] == filename and item["subfolder"] == subfolder and item["type"] == artifact_type for item in generation.get("outputs", []))
-    if not allowed:
-        raise ValueError("Artifact is not part of the requested generation.")
     if not SAFE_FILENAME.fullmatch(filename) or artifact_type not in ALLOWED_ARTIFACT_TYPES:
         raise ValueError("Invalid artifact reference.")
     if not isinstance(subfolder, str) or Path(subfolder).is_absolute() or ".." in Path(subfolder).parts or "\\" in subfolder:
         raise ValueError("Invalid artifact subfolder.")
+    generation = generation_status(generation_id)
+    allowed = any(item["filename"] == filename and item["subfolder"] == subfolder and item["type"] == artifact_type for item in generation.get("outputs", []))
+    if not allowed:
+        raise ValueError("Artifact is not part of the requested generation.")
     query = urllib.parse.urlencode({"filename": filename, "subfolder": subfolder, "type": artifact_type})
     url = os.getenv("MESH3D_COMFYUI_URL", DEFAULT_COMFY_URL).rstrip("/") + "/view?" + query
     try:
