@@ -27,7 +27,7 @@ export const api = {
     return request<Job>("/api/jobs", { method: "POST", body: data });
   },
   mediaEngines: () => request<MediaEngineStatus>("/api/media/engines"),
-  generateMedia: (kind: "image" | "video", prompt: string) => request<MediaGeneration>("/api/media/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind, prompt }) }),
+  generateMedia: (kind: "image" | "video", prompt: string, provider = "comfyui-local") => request<MediaGeneration>("/api/media/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind, prompt, provider }) }),
   mediaJob: (id: string) => request<MediaGeneration>(`/api/media/jobs/${encodeURIComponent(id)}`),
   mediaArtifactUrl: (output: MediaOutput, generationId: string) => {
     const query = new URLSearchParams({ generation_id: generationId, filename: output.filename, subfolder: output.subfolder, artifact_type: output.type });
@@ -37,6 +37,7 @@ export const api = {
 };
 
 export type MediaWorkflowStatus = { ready: boolean; workflow_configured: boolean; workflow_exists: boolean; prompt_node_configured: boolean; reason: string };
-export type MediaEngineStatus = { engine: string; configured: boolean; reachable: boolean; enabled: boolean; image: MediaWorkflowStatus; video: MediaWorkflowStatus };
+export type MediaProviderStatus = { id: string; name: string; supports: Array<"image" | "video">; configured: boolean; ready: boolean; ready_for: Array<"image" | "video">; free_tier: string; reason: string };
+export type MediaEngineStatus = { engine: string; configured: boolean; reachable: boolean; enabled: boolean; image: MediaWorkflowStatus; video: MediaWorkflowStatus; providers?: MediaProviderStatus[] };
 export type MediaOutput = { filename: string; subfolder: string; type: string };
 export type MediaGeneration = { id: string; kind?: "image" | "video"; status: string; engine?: string; outputs?: MediaOutput[] };

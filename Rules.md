@@ -4,7 +4,7 @@ Estas regras complementam a referência transversal [Hashzin-0/Rules](https://gi
 
 ## Classificação baseada em evidências
 
-Estado inicial verificado: o repositório contém documentação de planejamento, sem aplicação, dependências, fluxos executáveis, banco ou testes. Portanto, “editor 3D”, “processamento de mídia” e “pipeline de IA/modelos” são categorias planejadas, ainda não confirmadas por código. Ao adicionar implementação, reclassifique com base em dependências e fluxos reais.
+Estado verificado após as primeiras implementações: o repositório contém uma aplicação React/Vite e uma API FastAPI, com catálogo de motores de reconstrução, execução de jobs, visualizador e endpoints de geração de mídia. A geração local usa workflows ComfyUI configurados pelo servidor; adaptadores opcionais para Pollinations, Cloudflare Workers AI e Gradio Spaces estão implementados, mas só são utilizáveis com configuração válida. A presença dos adaptadores não comprova disponibilidade remota, cota gratuita, licença dos modelos ou geração real bem-sucedida; essas condições devem ser verificadas por provedor.
 
 ## Regras gerais obrigatórias
 
@@ -28,7 +28,7 @@ Estado inicial verificado: o repositório contém documentação de planejamento
 - Editor/experiência 3D: alinhar controles e visualização, liberar geometria/texturas/renderers ao desmontar, limitar custo por frame e oferecer fallback sem WebGL.
 - IA/modelos generativos: manter proveniência e licença de pesos; controlar timeout, concorrência, consumo de recursos e erros; nunca transformar indisponibilidade em saída fictícia.
 
-Estas regras especializadas orientam o desenho previsto, mas não significam que tais fluxos já estejam implementados.
+Estas regras especializadas aplicam-se aos fluxos existentes quando confirmados pelo código. A existência de uma rota ou adaptador não comprova que o serviço upstream esteja acessível nem que a geração tenha sido validada.
 
 ## Critério de entrega
 
