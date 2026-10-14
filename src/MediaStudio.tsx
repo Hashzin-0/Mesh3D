@@ -3,8 +3,8 @@ import { AlertCircle, CheckCircle2, Film, Image as ImageIcon, LoaderCircle, Refr
 import { api, type MediaEngineStatus, type MediaGeneration, type MediaProviderStatus } from "./api";
 
 const statusCopy: Record<string, string> = {
-  queued: "Queued in local ComfyUI",
-  running: "Generating on the configured local runtime",
+  queued: "Queued with the selected provider",
+  running: "Generating on the selected provider",
   completed: "Generation completed",
   failed: "Generation failed"
 };

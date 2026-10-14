@@ -2,7 +2,7 @@
 
 ## Decision
 
-Mesh3D uses a self-hosted ComfyUI instance as the first local generation runtime. The API integrates through ComfyUI HTTP endpoints; no paid/hosted generation API is used. ComfyUI and model weights are not bundled; operators install them on a trusted machine or GPU host. The browser cannot submit arbitrary workflows.
+Mesh3D retains self-hosted ComfyUI as its local generation runtime and adds optional server-side adapters for hosted image/video APIs. ComfyUI and model weights are not bundled; operators install them on a trusted machine or GPU host. Hosted adapters are disabled until the required server-side credentials/configuration are present. The browser cannot submit arbitrary workflows or upstream URLs.
 
 ## Supported local pipeline
 
