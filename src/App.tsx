@@ -3,6 +3,7 @@ import { Activity, AlertCircle, ArrowDownToLine, Box, Check, ChevronDown, Circle
 import { api, type Engine, type Job, type Mode } from "./api";
 import ModelViewer from "./viewer/ModelViewer";
 import MediaStudio from "./MediaStudio";
+import BlenderStudio from "./BlenderStudio";
 
 type UploadItem = { id: string; file: File; preview: string };
 const prettyBytes = (bytes: number) => bytes < 1024 * 1024 ? `${Math.max(1, Math.round(bytes / 1024))} KB` : `${(bytes / 1024 / 1024).toFixed(1)} MB`;
@@ -18,7 +19,7 @@ export default function App() {
   const [engines, setEngines] = useState<Engine[]>([]);
   const [jobs, setJobs] = useState<Job[]>([]);
   const [selected, setSelected] = useState<string[]>([]);
-  const [tab, setTab] = useState<"studio" | "jobs" | "compare" | "media">("studio");
+  const [tab, setTab] = useState<"studio" | "jobs" | "compare" | "media" | "blender">("studio");
   const [apiError, setApiError] = useState("");
   const [busy, setBusy] = useState(false);
   const [dragging, setDragging] = useState(false);
@@ -62,13 +63,14 @@ export default function App() {
     } catch (error) { setNotice(error instanceof Error ? error.message : "Could not submit job."); }
     finally { setBusy(false); }
   };
-  const nav = <><button className={tab === "studio" ? "nav-item active" : "nav-item"} onClick={() => { setTab("studio"); setMobileNav(false); }}><Cuboid size={17}/> Studio</button><button className={tab === "jobs" ? "nav-item active" : "nav-item"} onClick={() => { setTab("jobs"); setMobileNav(false); }}><Activity size={17}/> Jobs <span className="nav-count">{jobs.filter((job) => ["queued", "running"].includes(job.status)).length}</span></button><button className={tab === "compare" ? "nav-item active" : "nav-item"} onClick={() => { setTab("compare"); setMobileNav(false); }}><Grid2X2 size={17}/> Compare</button><button className={tab === "media" ? "nav-item active" : "nav-item"} onClick={() => { setTab("media"); setMobileNav(false); }}><Sparkles size={17}/> Create media</button></>;
+  const nav = <><button className={tab === "studio" ? "nav-item active" : "nav-item"} onClick={() => { setTab("studio"); setMobileNav(false); }}><Cuboid size={17}/> Studio</button><button className={tab === "jobs" ? "nav-item active" : "nav-item"} onClick={() => { setTab("jobs"); setMobileNav(false); }}><Activity size={17}/> Jobs <span className="nav-count">{jobs.filter((job) => ["queued", "running"].includes(job.status)).length}</span></button><button className={tab === "compare" ? "nav-item active" : "nav-item"} onClick={() => { setTab("compare"); setMobileNav(false); }}><Grid2X2 size={17}/> Compare</button><button className={tab === "media" ? "nav-item active" : "nav-item"} onClick={() => { setTab("media"); setMobileNav(false); }}><Sparkles size={17}/> Create media</button><button className={tab === "blender" ? "nav-item active" : "nav-item"} onClick={() => { setTab("blender"); setMobileNav(false); }}><Box size={17}/> Blender + Python</button></>;
   return <div className="app-shell">
     <header className="topbar"><div className="brand"><div className="brand-mark"><Cuboid size={20}/></div><span>mesh<span className="brand-accent">3d</span></span><span className="brand-version">STUDIO</span></div><button className="mobile-menu icon-button" aria-label="Toggle navigation" onClick={() => setMobileNav((value) => !value)}><Menu size={19}/></button><nav className={mobileNav ? "main-nav nav-open" : "main-nav"}>{nav}</nav><div className="topbar-right"><span className={apiError ? "connection connection-off" : "connection"}><span className="connection-dot"/> {apiError ? "API offline" : "API connected"}</span><button className="icon-button" aria-label="Refresh data" onClick={() => void refresh()}><RefreshCw size={16}/></button><div className="avatar">M</div></div></header>
     <main className="main-content">
       {apiError && <div className="alert alert-error"><AlertCircle size={17}/><div><strong>Backend connection unavailable</strong><p>{apiError}. Start the FastAPI service to load engine status, submit jobs, and retrieve actual outputs. The UI will not invent engine results.</p></div></div>}
       {notice && <div className="toast" role="status">{notice}<button className="icon-button" aria-label="Dismiss" onClick={() => setNotice("")}><X size={15}/></button></div>}
       {tab === "media" && <MediaStudio />}
+      {tab === "blender" && <BlenderStudio />}
       {tab === "studio" && <>
         <section className="page-heading"><div><div className="eyebrow"><span className="eyebrow-line"/> RECONSTRUCTION WORKSPACE</div><h1>Turn images into <span>3D assets.</span></h1><p>Run real reconstruction engines. Inspect outputs side by side. Keep every result reproducible.</p></div><button className="secondary-button" onClick={() => setTab("jobs")}><Clock3 size={16}/> Job history <ChevronDown size={14}/></button></section>
         <div className="workflow"><div className="workflow-step active"><span>01</span><div><b>Input images</b><small>Upload your capture</small></div></div><div className="workflow-connector"/><div className={selected.length ? "workflow-step active" : "workflow-step"}><span>02</span><div><b>Choose engines</b><small>Compare candidates</small></div></div><div className="workflow-connector"/><div className={uploads.length && selected.length ? "workflow-step active" : "workflow-step"}><span>03</span><div><b>Run & inspect</b><small>Review real outputs</small></div></div></div>
