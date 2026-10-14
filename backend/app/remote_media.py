@@ -58,7 +58,7 @@ def _provider_defs() -> list[dict[str, Any]]:
     return [
         {"id": "pollinations", "name": "Pollinations API", "supports": ["image"], "configured": pollinations_ready, "ready": pollinations_ready, "free_tier": "Account key and current quota required.", "reason": "Configured; live availability and current plan quota are checked only during a real request." if pollinations_ready else "Set POLLINATIONS_API_KEY on the API server. Free access and model limits depend on the current account plan."},
         {"id": "cloudflare-workers-ai", "name": "Cloudflare Workers AI · FLUX Schnell", "supports": ["image"], "configured": cloudflare_ready, "ready": cloudflare_ready, "free_tier": "Uses your Cloudflare Workers AI daily allocation, if eligible.", "reason": "Configured; the account quota and model availability are checked by the provider during generation." if cloudflare_ready else "Set CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN on the API server."},
-        {"id": "huggingface-spaces", "name": "Hugging Face Space (Gradio API)", "supports": ["image", "video"], "configured": space_host_ok and (hf_image_ready or hf_video_ready), "ready": hf_image_ready or hf_video_ready, "free_tier": "Space GPU quotas, queues and uptime vary; no free quota is guaranteed.", "reason": "Configure a separate API function and args JSON for each supported media type." if space_host_ok and (hf_image_ready or hf_video_ready) else "Set MESH3D_HF_SPACE_URL to the Space's https://<owner>-<space>.hf.space URL and configure its API function/arguments."},
+        {"id": "huggingface-spaces", "name": "Hugging Face Space (Gradio API)", "supports": [kind for kind, ready in (("image", hf_image_ready), ("video", hf_video_ready)) if ready], "configured": space_host_ok and (hf_image_ready or hf_video_ready), "ready": hf_image_ready or hf_video_ready, "free_tier": "Space GPU quotas, queues and uptime vary; no free quota is guaranteed.", "reason": "Configure a separate API function and args JSON for each supported media type." if space_host_ok and (hf_image_ready or hf_video_ready) else "Set MESH3D_HF_SPACE_URL to the Space's https://<owner>-<space>.hf.space URL and configure its API function/arguments."},
     ]
 
 
@@ -220,6 +220,8 @@ def _gradio_result(provider: str, kind: str, prompt: str) -> tuple[bytes, str]:
 
 def _generate(provider: str, kind: str, prompt: str) -> tuple[bytes, str]:
     if provider == "pollinations":
+        if len(prompt) > 3000:
+            raise ValueError("Pollinations prompts must be at most 3,000 characters because its image endpoint encodes the prompt in the URL.")
         model = os.getenv("MESH3D_POLLINATIONS_MODEL", "flux").strip() or "flux"
         url = "https://gen.pollinations.ai/image/" + urllib.parse.quote(prompt, safe="") + "?" + urllib.parse.urlencode({"model": model, "width": 1024, "height": 1024, "nologo": "true"})
         body, content_type = _request(url, headers={"Authorization": "Bearer " + os.environ["POLLINATIONS_API_KEY"], "Accept": "image/*"})

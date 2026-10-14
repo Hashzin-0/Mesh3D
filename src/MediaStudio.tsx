@@ -29,7 +29,7 @@ export default function MediaStudio() {
         setProvider("comfyui-local");
       }
     } catch (e) { setError(e instanceof Error ? e.message : "Could not inspect media providers."); }
-  }, []);
+  }, [kind, provider]);
   useEffect(() => { void refreshEngine(); }, [refreshEngine]);
   useEffect(() => {
     if (!generation || ["completed", "failed"].includes(generation.status)) return;
