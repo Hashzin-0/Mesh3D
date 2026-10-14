@@ -60,3 +60,15 @@ Backend: `cd backend && pip install -r requirements.txt pytest && pytest`
 Adapter syntax: `python -m compileall -q engine-wrappers`
 
 Passing CI does not prove any upstream model can run. Real smoke tests require rights-cleared fixtures, pinned source/checkpoint versions, intended hardware, and manual artifact inspection.
+
+
+## Local image and video generation
+
+The **Create media** workspace supports local image/video generation through a self-hosted ComfyUI instance. It does not call paid generation APIs and does not bundle model weights. Generation is disabled by default; configure and validate a local API-format workflow, then explicitly enable it on a trusted runtime. Do not run GPU inference inside Vercel Functions.
+
+- Architecture, configuration, workflow contracts and license checks: [Local image and video generation](docs/LOCAL_MEDIA_GENERATION.md).
+- Image models: compatible Stable Diffusion / FLUX checkpoints through ComfyUI; Diffusers + PyTorch is the future direct-inference adapter path.
+- Video models: locally installed Wan 2.2 or LTX-Video workflows through ComfyUI.
+- Media processing: FFmpeg for transcoding and audio/video muxing.
+
+The repository changes and unit tests do not prove that ComfyUI, a model checkpoint, or a GPU is installed. Validate real image and video outputs on the intended host before enabling production use.
