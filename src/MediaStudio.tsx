@@ -46,7 +46,7 @@ export default function MediaStudio() {
   const activeStatus = provider === "comfyui-local"
     ? engine?.[kind]
     : selectedProvider
-      ? { ready: selectedProvider.ready && selectedProvider.supports.includes(kind), reason: selectedProvider.supports.includes(kind) ? selectedProvider.reason : `This provider does not support ${kind}.` }
+      ? { ready: selectedProvider.ready_for.includes(kind) && selectedProvider.supports.includes(kind), reason: selectedProvider.supports.includes(kind) ? selectedProvider.reason : `This provider does not support ${kind}.` }
       : undefined;
   const submit = async () => {
     setError("");

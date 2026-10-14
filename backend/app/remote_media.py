@@ -56,9 +56,9 @@ def _provider_defs() -> list[dict[str, Any]]:
     hf_image_ready = space_host_ok and bool(os.getenv("MESH3D_HF_IMAGE_API_NAME", "").strip()) and _valid_args(os.getenv("MESH3D_HF_IMAGE_ARGS_JSON", '["__PROMPT__"]'))
     hf_video_ready = space_host_ok and bool(os.getenv("MESH3D_HF_VIDEO_API_NAME", "").strip()) and _valid_args(os.getenv("MESH3D_HF_VIDEO_ARGS_JSON", '["__PROMPT__"]'))
     return [
-        {"id": "pollinations", "name": "Pollinations API", "supports": ["image"], "configured": pollinations_ready, "ready": pollinations_ready, "free_tier": "Account key and current quota required.", "reason": "Configured; live availability and current plan quota are checked only during a real request." if pollinations_ready else "Set POLLINATIONS_API_KEY on the API server. Free access and model limits depend on the current account plan."},
-        {"id": "cloudflare-workers-ai", "name": "Cloudflare Workers AI · FLUX Schnell", "supports": ["image"], "configured": cloudflare_ready, "ready": cloudflare_ready, "free_tier": "Uses your Cloudflare Workers AI daily allocation, if eligible.", "reason": "Configured; the account quota and model availability are checked by the provider during generation." if cloudflare_ready else "Set CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN on the API server."},
-        {"id": "huggingface-spaces", "name": "Hugging Face Space (Gradio API)", "supports": [kind for kind, ready in (("image", hf_image_ready), ("video", hf_video_ready)) if ready], "configured": space_host_ok and (hf_image_ready or hf_video_ready), "ready": hf_image_ready or hf_video_ready, "free_tier": "Space GPU quotas, queues and uptime vary; no free quota is guaranteed.", "reason": "Configure a separate API function and args JSON for each supported media type." if space_host_ok and (hf_image_ready or hf_video_ready) else "Set MESH3D_HF_SPACE_URL to the Space's https://<owner>-<space>.hf.space URL and configure its API function/arguments."},
+        {"id": "pollinations", "name": "Pollinations API", "supports": ["image"], "configured": pollinations_ready, "ready": pollinations_ready, "ready_for": ["image"] if pollinations_ready else [], "free_tier": "Account key and current quota required.", "reason": "Configured; live availability and current plan quota are checked only during a real request." if pollinations_ready else "Set POLLINATIONS_API_KEY on the API server. Free access and model limits depend on the current account plan."},
+        {"id": "cloudflare-workers-ai", "name": "Cloudflare Workers AI · FLUX Schnell", "supports": ["image"], "configured": cloudflare_ready, "ready": cloudflare_ready, "ready_for": ["image"] if cloudflare_ready else [], "free_tier": "Uses your Cloudflare Workers AI daily allocation, if eligible.", "reason": "Configured; the account quota and model availability are checked by the provider during generation." if cloudflare_ready else "Set CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN on the API server."},
+        {"id": "huggingface-spaces", "name": "Hugging Face Space (Gradio API)", "supports": ["image", "video"], "configured": space_host_ok and (hf_image_ready or hf_video_ready), "ready": hf_image_ready or hf_video_ready, "ready_for": [kind for kind, ready in (("image", hf_image_ready), ("video", hf_video_ready)) if ready], "free_tier": "Space GPU quotas, queues and uptime vary; no free quota is guaranteed.", "reason": "Configure a separate API function and args JSON for each supported media type." if space_host_ok and (hf_image_ready or hf_video_ready) else "Set MESH3D_HF_SPACE_URL to the Space's https://<owner>-<space>.hf.space URL and configure its API function/arguments."},
     ]
 
 
@@ -115,7 +115,7 @@ def submit_remote_generation(provider: str, kind: str, prompt: str) -> dict[str,
         raise ValueError("Unknown media provider.")
     if kind not in definition["supports"]:
         raise ValueError(f"{definition['name']} does not support {kind}.")
-    if not definition["ready"]:
+    if kind not in definition.get("ready_for", []):
         raise RuntimeError(definition["reason"])
     generation_id = "remote_" + uuid.uuid4().hex
     _save_job({"id": generation_id, "kind": kind, "provider": provider, "status": "queued", "created_at": _now(), "outputs": [], "error": None})
