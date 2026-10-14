@@ -7,12 +7,13 @@ from typing import Annotated
 
 from fastapi import BackgroundTasks, FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from PIL import Image, UnidentifiedImageError
 
 from .engine_registry import ENGINES, public_engine, resolve_engine
 from .jobs import DATA_DIR, get_job, init_db, list_jobs, public_job, save_job
 from .tasks import run_job
+from .media_engines import media_engine_status as get_media_engine_status, submit_generation, generation_status, read_artifact
 
 MAX_FILE_BYTES = int(os.getenv("MESH3D_MAX_IMAGE_BYTES", str(25 * 1024 * 1024)))
 MAX_IMAGES = int(os.getenv("MESH3D_MAX_IMAGES", "80"))
@@ -32,6 +33,47 @@ def startup() -> None:
 @app.get("/api/health")
 def health() -> dict:
     return {"status": "ok", "service": "mesh3d-api"}
+
+
+
+@app.get("/api/media/engines")
+def media_engines_status() -> dict:
+    return get_media_engine_status()
+
+
+@app.post("/api/media/generate", status_code=202)
+def media_generate(payload: dict) -> dict:
+    kind = payload.get("kind")
+    prompt = payload.get("prompt")
+    if kind not in ("image", "video") or not isinstance(prompt, str):
+        raise HTTPException(status_code=422, detail="Provide kind=image|video and a prompt string.")
+    try:
+        return submit_generation(kind, prompt)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@app.get("/api/media/jobs/{generation_id}")
+def media_job_status(generation_id: str) -> dict:
+    try:
+        return generation_status(generation_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@app.get("/api/media/artifact")
+def media_artifact(generation_id: str, filename: str, subfolder: str = "", artifact_type: str = "output") -> Response:
+    try:
+        content, content_type = read_artifact(generation_id, filename, subfolder, artifact_type)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except RuntimeError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    return Response(content=content, media_type=content_type, headers={"Cache-Control": "no-store", "X-Content-Type-Options": "nosniff"})
 
 
 @app.get("/api/engines")
