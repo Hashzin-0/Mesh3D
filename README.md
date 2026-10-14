@@ -2,7 +2,7 @@
 
 Mesh3D is an image-to-3D reconstruction studio for comparing real outputs from one image or a multi-view capture. It includes a responsive web client, FastAPI API, an in-process job runner for local development, a gated engine registry, local SQLite metadata, and a Three.js viewer for GLB/GLTF artifacts.
 
-> **Status:** seven concrete upstream adapter entry points are included. Upstream checkouts, engine-specific environments, checkpoints and accelerator runtime remain operator-provisioned. No successful model/GPU smoke test or bundled model weights are claimed. Engines remain unavailable until their license approval flags and runtime commands are configured.
+> **Status:** seven concrete upstream adapter entry points are included. Upstream checkouts, engine-specific environments, checkpoints and accelerator runtime remain operator-provisioned. No successful model/GPU smoke test or bundled model weights are claimed. Engines are not considered ready until license gates, wrapper configuration, and a valid real-run validation report are present.
 
 ## Features
 
@@ -42,13 +42,14 @@ Vercel Services must also be enabled as the project's framework in Vercel projec
 
 ## Engine integration
 
-See [Engine integration and runtime setup](docs/ENGINE_INTEGRATION.md), the [wrapper contract](engine-wrappers/README.md), [.env.example](.env.example), [engine provenance register](docs/ENGINE_PROVENANCE.md), and [real engine test report template](docs/ENGINE_TEST_REPORT.md).
+See [Engine integration and runtime setup](docs/ENGINE_INTEGRATION.md), the [wrapper contract](engine-wrappers/README.md), [.env.example](.env.example), [engine provenance register](docs/ENGINE_PROVENANCE.md), [real engine test report template](docs/ENGINE_TEST_REPORT.md), and the [evidence-based activation gate](docs/ENGINE_VALIDATION_GATE.md).
 
 Important distinctions:
 - The four single-image engines use different dependency and checkpoint stacks; keep their Python environments separate.
 - Meshroom and COLMAP + OpenMVS are photogrammetry pipelines for multi-view captures.
 - VGGT outputs camera/scene geometry and point-cloud data; it is not automatically a textured watertight mesh.
 - The viewer currently targets GLB/GLTF. Other supported artifacts may be delivered as files but are not guaranteed to preview in the in-app viewer.
+- The registry requires an explicit license approval, configured wrapper, additional review where applicable, and a machine-readable report from a real run before it can return `ready`.
 - The generic runner is for controlled local evaluation, not a hardened multi-tenant public service. Public deployment still needs worker isolation, authentication/authorization, quotas, network restrictions, retention policy, and deployment-grade storage.
 
 ## Checks
