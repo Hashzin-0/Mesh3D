@@ -29,8 +29,8 @@ export const api = {
   mediaEngines: () => request<MediaEngineStatus>("/api/media/engines"),
   generateMedia: (kind: "image" | "video", prompt: string) => request<MediaGeneration>("/api/media/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind, prompt }) }),
   mediaJob: (id: string) => request<MediaGeneration>(`/api/media/jobs/${encodeURIComponent(id)}`),
-  mediaArtifactUrl: (output: MediaOutput) => {
-    const query = new URLSearchParams({ filename: output.filename, subfolder: output.subfolder, artifact_type: output.type });
+  mediaArtifactUrl: (output: MediaOutput, generationId: string) => {
+    const query = new URLSearchParams({ generation_id: generationId, filename: output.filename, subfolder: output.subfolder, artifact_type: output.type });
     return base + "/api/media/artifact?" + query.toString();
   },
   artifactUrl: (url: string) => url.startsWith("http") ? url : base + url
