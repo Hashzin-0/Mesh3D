@@ -66,9 +66,9 @@ def media_job_status(generation_id: str) -> dict:
 
 
 @app.get("/api/media/artifact")
-def media_artifact(filename: str, subfolder: str = "", artifact_type: str = "output") -> Response:
+def media_artifact(generation_id: str, filename: str, subfolder: str = "", artifact_type: str = "output") -> Response:
     try:
-        content, content_type = read_artifact(filename, subfolder, artifact_type)
+        content, content_type = read_artifact(generation_id, filename, subfolder, artifact_type)
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     except RuntimeError as exc:
