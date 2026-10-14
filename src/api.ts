@@ -37,6 +37,6 @@ export const api = {
 };
 
 export type MediaWorkflowStatus = { ready: boolean; workflow_configured: boolean; workflow_exists: boolean; prompt_node_configured: boolean; reason: string };
-export type MediaEngineStatus = { engine: string; url: string; configured: boolean; reachable: boolean; image: MediaWorkflowStatus; video: MediaWorkflowStatus };
+export type MediaEngineStatus = { engine: string; configured: boolean; reachable: boolean; enabled: boolean; image: MediaWorkflowStatus; video: MediaWorkflowStatus };
 export type MediaOutput = { filename: string; subfolder: string; type: string };
 export type MediaGeneration = { id: string; kind?: "image" | "video"; status: string; engine?: string; outputs?: MediaOutput[] };
