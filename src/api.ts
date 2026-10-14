@@ -26,17 +26,5 @@ export const api = {
     files.forEach((file) => data.append("images", file, file.name));
     return request<Job>("/api/jobs", { method: "POST", body: data });
   },
-  mediaEngines: () => request<MediaEngineStatus>("/api/media/engines"),
-  generateMedia: (kind: "image" | "video", prompt: string) => request<MediaGeneration>("/api/media/generate", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ kind, prompt }) }),
-  mediaJob: (id: string) => request<MediaGeneration>(`/api/media/jobs/${encodeURIComponent(id)}`),
-  mediaArtifactUrl: (output: MediaOutput) => {
-    const query = new URLSearchParams({ filename: output.filename, subfolder: output.subfolder, artifact_type: output.type });
-    return base + "/api/media/artifact?" + query.toString();
-  },
   artifactUrl: (url: string) => url.startsWith("http") ? url : base + url
 };
-
-export type MediaWorkflowStatus = { ready: boolean; workflow_configured: boolean; workflow_exists: boolean; prompt_node_configured: boolean; reason: string };
-export type MediaEngineStatus = { engine: string; url: string; configured: boolean; reachable: boolean; image: MediaWorkflowStatus; video: MediaWorkflowStatus };
-export type MediaOutput = { filename: string; subfolder: string; type: string };
-export type MediaGeneration = { id: string; kind?: "image" | "video"; status: string; engine?: string; outputs: MediaOutput[] };
